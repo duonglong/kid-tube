@@ -906,6 +906,7 @@ function startCurrent() {
 const S = { panels: [], inited: false, readyCount: 0 };
 let roles = [0, 1, 2];   // S.panels index occupying the [prev, current, next] slot
 let sIdx = 0;
+let sUserPaused = false; // only a user tap may show the pause indicator — internal preload pauses must not
 const at = (i) => (i + REELS.length) % REELS.length;
 
 function applyPos() {
@@ -971,8 +972,8 @@ function preload(pan, id) {
 function onSState(pan, e) {
   if (e.data === YT.PlayerState.PLAYING) {
     if (pan.mode === 'preload') { pan.p.pauseVideo(); pan.p.seekTo(0, true); pan.ready = true; }
-    else if (pan.mode === 'live') { errStreak = 0; hidePoster(pan); $('sPause').classList.add('hidden'); }
-  } else if (e.data === YT.PlayerState.PAUSED && pan.mode === 'live' && currentMode === 'reels') {
+    else if (pan.mode === 'live') { errStreak = 0; hidePoster(pan); sUserPaused = false; $('sPause').classList.add('hidden'); }
+  } else if (e.data === YT.PlayerState.PAUSED && pan.mode === 'live' && currentMode === 'reels' && sUserPaused) {
     $('sPause').classList.remove('hidden');     // masks YouTube's own play button
   } else if (e.data === YT.PlayerState.ENDED && pan.mode === 'live') {
     pan.p.seekTo(0, true); pan.p.playVideo();   // Shorts loop
@@ -1000,6 +1001,7 @@ function openShorts(index) {
   document.body.style.overflow = 'hidden';
   $('shortsFill').style.width = '0%';
   $('sLike').classList.remove('liked');
+  sUserPaused = false;
   $('sPause').classList.add('hidden');
   initShorts(() => {
     applyPos();
@@ -1134,6 +1136,7 @@ function commitSwipe(dir) {  // 1 = next (swipe up), -1 = previous (swipe down)
   sIdx = at(sIdx + dir);
   $('shortsFill').style.width = '0%';
   $('sLike').classList.remove('liked');
+  sUserPaused = false;
   $('sPause').classList.add('hidden');
   goLive(inPan, REELS[sIdx].id);          // preloaded neighbor: starts instantly
   track.classList.add('anim');
@@ -1239,15 +1242,17 @@ $('sShield').addEventListener('click', () => {
   const pan = S.panels[roles[1]];
   if (!pan || pan.mode !== 'live') return;
   if (pan.p.getPlayerState() === YT.PlayerState.PLAYING) {
+    sUserPaused = true;
     $('sPause').classList.remove('hidden');   // show before the pause lands: no flash of YouTube's button
     pan.p.pauseVideo();
   } else {
+    sUserPaused = false;
     pan.p.playVideo();
   }
 });
 $('sPause').addEventListener('click', () => {
   const pan = S.panels[roles[1]];
-  if (pan && pan.mode === 'live') pan.p.playVideo();
+  if (pan && pan.mode === 'live') { sUserPaused = false; pan.p.playVideo(); }
 });
 $('sBack').addEventListener('click', closePlayer);
 $('sLike').addEventListener('click', () => $('sLike').classList.toggle('liked'));
