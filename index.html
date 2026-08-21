@@ -905,9 +905,25 @@ function startCurrent() {
       muted & paused at frame zero so a swipe starts playback instantly ── */
 const S = { panels: [], inited: false, readyCount: 0 };
 let roles = [0, 1, 2];   // S.panels index occupying the [prev, current, next] slot
-let sIdx = 0;
 let sUserPaused = false; // only a user tap may show the pause indicator — internal preload pauses must not
-const at = (i) => (i + REELS.length) % REELS.length;
+
+/* Shorts feed order: swipe up = a pre-picked random short (no repeats until the
+   whole pool is seen), swipe down = back through watch history */
+let sHist = [], sPos = 0, pendingNext = 0, sBag = [];
+function nextRandomIdx() {
+  if (!sBag.length) {
+    sBag = REELS.map((_, i) => i);
+    for (let i = sBag.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [sBag[i], sBag[j]] = [sBag[j], sBag[i]];
+    }
+  }
+  // never serve the currently playing short as "next"
+  if (sBag[sBag.length - 1] === sHist[sPos] && sBag.length > 1) {
+    sBag.unshift(sBag.pop());
+  }
+  return sBag.pop();
+}
 
 function applyPos() {
   const cls = ['pos-prev', 'pos-cur', 'pos-next'];
@@ -923,6 +939,14 @@ function setPoster(pan, id) {
   pan.el.querySelector('.sposter').classList.remove('hidden');
 }
 function hidePoster(pan) { pan.el.querySelector('.sposter').classList.add('hidden'); }
+
+function clearPanel(pan) {  // used for the "previous" slot when history is empty
+  pan.mode = 'off'; pan.id = null; pan.ready = false;
+  if (pan.p && typeof pan.p.pauseVideo === 'function') { pan.p.mute(); pan.p.pauseVideo(); }
+  const img = pan.el.querySelector('.sposter img');
+  img.onerror = null; img.removeAttribute('src');
+  pan.el.querySelector('.sposter').classList.remove('hidden');
+}
 
 function initShorts(cb) {
   if (S.inited) { cb(); return; }
@@ -995,7 +1019,7 @@ function onSError(pan) {
 
 function openShorts(index) {
   currentMode = 'reels';
-  sIdx = index;
+  sHist = [index]; sPos = 0;
   $('overlay').classList.remove('hidden');
   $('overlay').classList.add('shorts-mode');
   document.body.style.overflow = 'hidden';
@@ -1005,10 +1029,11 @@ function openShorts(index) {
   $('sPause').classList.add('hidden');
   initShorts(() => {
     applyPos();
-    goLive(S.panels[roles[1]], REELS[sIdx].id);
+    goLive(S.panels[roles[1]], REELS[index].id);
     if (REELS.length > 1) {
-      preload(S.panels[roles[0]], REELS[at(sIdx - 1)].id);
-      preload(S.panels[roles[2]], REELS[at(sIdx + 1)].id);
+      pendingNext = nextRandomIdx();
+      preload(S.panels[roles[2]], REELS[pendingNext].id);
+      clearPanel(S.panels[roles[0]]);   // no history yet — nothing behind us
     }
     if (!ticker) ticker = setInterval(tick, 400);
   });
@@ -1124,21 +1149,25 @@ function scheduleHide() {
 const track = $('track'), overlayEl = $('overlay');
 let dragStartY = null, suppressClick = false, wheelLock = false, animating = false;
 
-function commitSwipe(dir) {  // 1 = next (swipe up), -1 = previous (swipe down)
-  if (animating || REELS.length < 2 || !S.inited) {
+function commitSwipe(dir) {  // 1 = swipe up (random next), -1 = swipe down (history back)
+  if (animating || REELS.length < 2 || !S.inited || (dir === -1 && sPos === 0)) {
     track.classList.add('anim'); track.style.transform = 'translateY(0)';
-    return;
+    return;   // at the first short, swiping down just bounces back
   }
   animating = true;
   const outPan = S.panels[roles[1]];
   const inPan = S.panels[roles[dir === 1 ? 2 : 0]];
+  // a stale pre-pick can collide with the current short after back-and-forth navigation
+  if (dir === 1 && sPos === sHist.length - 1 && pendingNext === sHist[sPos]) pendingNext = nextRandomIdx();
+  const targetIdx = dir === 1
+    ? (sPos < sHist.length - 1 ? sHist[sPos + 1] : pendingNext)
+    : sHist[sPos - 1];
   outPan.mode = 'off'; outPan.p.mute(); outPan.p.pauseVideo();
-  sIdx = at(sIdx + dir);
   $('shortsFill').style.width = '0%';
   $('sLike').classList.remove('liked');
   sUserPaused = false;
   $('sPause').classList.add('hidden');
-  goLive(inPan, REELS[sIdx].id);          // preloaded neighbor: starts instantly
+  goLive(inPan, REELS[targetIdx].id);     // preloaded neighbor: starts instantly
   track.classList.add('anim');
   track.style.transform = 'translateY(' + (dir === 1 ? '-100%' : '100%') + ')';
   let fired = false;
@@ -1151,7 +1180,16 @@ function commitSwipe(dir) {  // 1 = next (swipe up), -1 = previous (swipe down)
     applyPos();
     track.classList.remove('anim');
     track.style.transform = 'translateY(0)';
-    preload(S.panels[roles[dir === 1 ? 2 : 0]], REELS[at(sIdx + dir)].id);
+    if (dir === 1) {
+      if (sPos < sHist.length - 1) sPos++;          // moving forward through history
+      else { sHist.push(pendingNext); sPos++; pendingNext = nextRandomIdx(); }
+      const upcoming = sPos < sHist.length - 1 ? sHist[sPos + 1] : pendingNext;
+      preload(S.panels[roles[2]], REELS[upcoming].id);
+    } else {
+      sPos--;
+      if (sPos > 0) preload(S.panels[roles[0]], REELS[sHist[sPos - 1]].id);
+      else clearPanel(S.panels[roles[0]]);          // reached the first short again
+    }
     animating = false;
   };
   track.addEventListener('transitionend', done);
