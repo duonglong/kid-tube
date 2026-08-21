@@ -1216,13 +1216,14 @@ $('fsBtn').addEventListener('click', () => {
 document.addEventListener('fullscreenchange', updateFsIcon);
 document.addEventListener('webkitfullscreenchange', updateFsIcon);
 
-/* Shorts chrome: silent tap-to-pause, back arrow, decorative rail (Like toggles) */
+/* Shorts chrome: tap never pauses (a paused embed shows YouTube's own play
+   button inside the iframe, which we can't hide) — tap only starts playback
+   when it isn't running, e.g. after a blocked autoplay */
 $('sShield').addEventListener('click', () => {
   if (suppressClick || !S.inited) return;
   const pan = S.panels[roles[1]];
   if (!pan || pan.mode !== 'live') return;
-  if (pan.p.getPlayerState() === YT.PlayerState.PLAYING) pan.p.pauseVideo();
-  else pan.p.playVideo();
+  if (pan.p.getPlayerState() !== YT.PlayerState.PLAYING) pan.p.playVideo();
 });
 $('sBack').addEventListener('click', closePlayer);
 $('sLike').addEventListener('click', () => $('sLike').classList.toggle('liked'));
