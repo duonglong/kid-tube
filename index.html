@@ -3,210 +3,255 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>Kiddo TV</title>
+<title>KiddoTV</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-  body {
-    font-family: 'Fredoka', 'Comic Sans MS', system-ui, sans-serif;
-    background: linear-gradient(160deg, #fef6e4 0%, #e8f4ff 100%);
-    min-height: 100vh;
-    color: #2b2b45;
+  :root {
+    --txt: #0f0f0f;
+    --txt2: #606060;
+    --bg: #ffffff;
+    --chip: #f2f2f2;
+    --chip-hover: #e5e5e5;
+    --line: #e5e5e5;
+    --red: #ff0000;
   }
+
+  body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--txt);
+    min-height: 100vh;
+  }
+  button { font-family: inherit; }
 
   /* ── Header ─────────────────────────────── */
   header {
-    position: sticky; top: 0; z-index: 10;
-    display: flex; align-items: center; gap: 16px;
-    padding: 14px 20px;
-    background: #fff;
-    box-shadow: 0 2px 12px rgba(80, 80, 140, .12);
+    position: sticky; top: 0; z-index: 60;
+    display: flex; align-items: center; gap: 8px;
+    height: 56px; padding: 0 16px;
+    background: var(--bg);
   }
-  .logo {
-    font-size: 26px; font-weight: 700;
-    background: linear-gradient(90deg, #ff5d8f, #ff9e2c, #38c976);
-    -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent;
-    user-select: none;
+  .iconbtn {
+    border: none; background: transparent; cursor: pointer;
+    width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+    display: grid; place-items: center;
   }
-  nav { display: flex; gap: 10px; margin-left: auto; }
-  .tab {
-    border: none; cursor: pointer;
-    font-family: inherit; font-size: 17px; font-weight: 600;
-    padding: 10px 22px; border-radius: 999px;
-    background: #f0f0fa; color: #6b6b8f;
-    transition: all .15s;
-  }
-  .tab.active { background: #ff5d8f; color: #fff; box-shadow: 0 4px 12px rgba(255, 93, 143, .4); }
+  .iconbtn:hover { background: var(--chip); }
+  .iconbtn svg { width: 24px; height: 24px; fill: var(--txt); }
 
-  /* ── Grids ──────────────────────────────── */
-  main { padding: 24px; max-width: 1200px; margin: 0 auto; }
-  .grid {
-    display: grid; gap: 22px;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  .logo {
+    display: flex; align-items: center; gap: 4px;
+    border: none; background: transparent; cursor: pointer;
+    padding: 0 8px; user-select: none;
   }
-  .grid.reels { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .logo svg { width: 30px; height: 21px; }
+  .logo span {
+    font-size: 20px; font-weight: 700; letter-spacing: -1px;
+    color: var(--txt); font-family: 'Roboto', Arial, sans-serif;
+  }
+
+  #searchWrap {
+    flex: 1; max-width: 640px; margin: 0 auto;
+    display: flex; align-items: center; height: 40px;
+  }
+  #searchInput {
+    flex: 1; height: 100%; min-width: 0;
+    padding: 0 16px; font-size: 16px; font-family: inherit;
+    border: 1px solid #ccc; border-right: none;
+    border-radius: 20px 0 0 20px; outline: none;
+    color: var(--txt); background: var(--bg);
+  }
+  #searchInput:focus { border-color: #1c62b9; }
+  #searchBtn {
+    width: 64px; height: 100%; cursor: pointer;
+    border: 1px solid #ccc; border-radius: 0 20px 20px 0;
+    background: #f8f8f8;
+    display: grid; place-items: center;
+  }
+  #searchBtn:hover { background: #f0f0f0; }
+  #searchBtn svg { width: 22px; height: 22px; fill: var(--txt); }
+
+  #avatar {
+    width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+    background: #7c4dff; color: #fff;
+    display: grid; place-items: center;
+    font-size: 15px; font-weight: 500;
+    margin-left: 8px; user-select: none;
+  }
+
+  /* ── Layout: mini sidebar + content ─────── */
+  #page { display: flex; }
+  #sidebar {
+    width: 72px; flex-shrink: 0;
+    position: sticky; top: 56px; align-self: flex-start;
+    display: flex; flex-direction: column; padding: 4px;
+  }
+  .navbtn {
+    border: none; background: transparent; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 16px 0 14px; border-radius: 10px;
+    font-size: 10px; color: var(--txt);
+  }
+  .navbtn:hover { background: var(--chip); }
+  .navbtn svg { width: 24px; height: 24px; fill: var(--txt); }
+  .navbtn .on { display: none; }
+  .navbtn.active .on { display: block; }
+  .navbtn.active .off { display: none; }
+  .navbtn.active { font-weight: 500; }
+
+  #content { flex: 1; min-width: 0; }
+
+  /* ── Chips row ──────────────────────────── */
+  #chips {
+    position: sticky; top: 56px; z-index: 50;
+    display: flex; gap: 12px; align-items: center;
+    padding: 4px 16px 12px;
+    background: var(--bg);
+    overflow-x: auto; scrollbar-width: none;
+  }
+  #chips::-webkit-scrollbar { display: none; }
+  .chip {
+    border: none; cursor: pointer; flex-shrink: 0;
+    padding: 0 12px; height: 32px; border-radius: 8px;
+    background: var(--chip); color: var(--txt);
+    font-size: 14px; font-weight: 500;
+  }
+  .chip:hover { background: var(--chip-hover); }
+  .chip.active { background: var(--txt); color: var(--bg); }
+
+  /* ── Video grid (home) ──────────────────── */
+  main { padding: 8px 16px 32px; }
+  .grid {
+    display: grid; gap: 40px 16px;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  }
+  .grid.reels { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 28px 16px; }
 
   .card {
-    background: #fff; border-radius: 18px; overflow: hidden;
-    cursor: pointer; border: none; padding: 0; text-align: left;
-    font-family: inherit;
-    box-shadow: 0 4px 14px rgba(80, 80, 140, .12);
-    transition: transform .15s, box-shadow .15s;
+    border: none; background: transparent; padding: 0;
+    text-align: left; cursor: pointer;
   }
-  .card:hover, .card:focus-visible { transform: translateY(-4px) scale(1.02); box-shadow: 0 10px 24px rgba(80, 80, 140, .2); }
-  .card:active { transform: scale(.97); }
-
-  .thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #dcdcf0; }
-  .reels .thumb { aspect-ratio: 9 / 14; }
+  .thumb {
+    position: relative; width: 100%; aspect-ratio: 16 / 9;
+    border-radius: 12px; overflow: hidden; background: var(--chip);
+  }
+  .reels .thumb { aspect-ratio: 9 / 16; }
   .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .thumb::after {
-    content: '▶'; position: absolute; inset: 0;
-    display: grid; place-items: center;
-    font-size: 34px; color: #fff;
-    text-shadow: 0 2px 10px rgba(0,0,0,.5);
-    opacity: 0; transition: opacity .15s;
-    background: rgba(0,0,0,.18);
+  .card:hover .thumb { border-radius: 0; transition: border-radius .2s .15s; }
+
+  .cinfo { display: flex; gap: 12px; padding: 12px 0 0; }
+  .cavatar {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+    color: #fff; display: grid; place-items: center;
+    font-size: 16px; font-weight: 500; user-select: none;
   }
-  .card:hover .thumb::after { opacity: 1; }
-  .card h3 {
-    padding: 12px 14px 14px;
-    font-size: 15.5px; font-weight: 600; line-height: 1.35;
+  .ctitle {
+    font-size: 16px; font-weight: 500; line-height: 22px; color: var(--txt);
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .empty { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #9a9ab8; font-size: 18px; }
+  .cch { font-size: 14px; color: var(--txt2); margin-top: 4px; }
+  .reels .ctitle { font-size: 14px; line-height: 20px; }
+  .reels .cinfo { padding-top: 8px; }
+  .empty { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--txt2); font-size: 16px; }
   .hidden { display: none !important; }
 
-  /* ── Watch page (YouTube-style layout for regular videos) ── */
-  #watch { max-width: 1280px; margin: 0 auto; padding: 20px 24px; }
+  /* ── Bottom nav (mobile) ────────────────── */
+  #bottomnav {
+    display: none;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    height: 56px; background: var(--bg); border-top: 1px solid var(--line);
+  }
+  #bottomnav .navbtn { flex: 1; padding: 6px 0; border-radius: 0; gap: 2px; }
+
+  /* ── Watch page ─────────────────────────── */
+  #watch { max-width: 1280px; margin: 0 auto; padding: 24px; }
   .watch-layout {
-    display: grid; grid-template-columns: minmax(0, 1fr) 360px;
+    display: grid; grid-template-columns: minmax(0, 1fr) 400px;
     gap: 24px; align-items: start;
   }
-  #watchTitle { font-size: 19px; font-weight: 600; line-height: 1.4; margin: 14px 4px 0; }
-  .watch-main #vtitle { display: none; }   /* title lives below the player, like YouTube */
-  .upnext h2 { font-size: 16px; font-weight: 700; margin: 0 0 10px; }
-  .unrow {
-    display: flex; gap: 10px; width: 100%;
-    padding: 6px; border: none; border-radius: 12px;
-    background: transparent; cursor: pointer;
-    font-family: inherit; text-align: left;
+  #watchTitle { font-size: 20px; font-weight: 700; line-height: 28px; margin: 12px 0 8px; }
+  .watch-main #vtitle { display: none; }
+
+  .wchrow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+  #wchAvatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    color: #fff; display: grid; place-items: center;
+    font-size: 18px; font-weight: 500; user-select: none;
   }
-  .unrow:hover { background: #fff; box-shadow: 0 2px 10px rgba(80,80,140,.12); }
+  #wchName { font-size: 16px; font-weight: 500; }
+  .subbtn {
+    border: none; cursor: pointer;
+    height: 36px; padding: 0 16px; border-radius: 18px;
+    background: var(--txt); color: var(--bg);
+    font-size: 14px; font-weight: 500;
+    margin-left: 12px;
+  }
+  .wacts { display: flex; gap: 8px; margin-left: auto; }
+  .pill {
+    border: none; cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    height: 36px; padding: 0 16px; border-radius: 18px;
+    background: var(--chip); color: var(--txt);
+    font-size: 14px; font-weight: 500;
+  }
+  .pill:hover { background: var(--chip-hover); }
+  .pill svg { width: 20px; height: 20px; fill: var(--txt); }
+  .pill.liked { background: #fce8e8; }
+  .pill.liked svg { fill: var(--red); }
+
+  .upnext h2 { font-size: 16px; font-weight: 700; margin: 0 0 12px; }
+  .unrow {
+    display: flex; gap: 8px; width: 100%;
+    padding: 4px; border: none; border-radius: 10px;
+    background: transparent; cursor: pointer; text-align: left;
+  }
+  .unrow:hover { background: var(--chip); }
   .unrow img {
-    width: 150px; aspect-ratio: 16 / 9; object-fit: cover;
-    border-radius: 10px; flex-shrink: 0; background: #dcdcf0;
+    width: 168px; aspect-ratio: 16 / 9; object-fit: cover;
+    border-radius: 8px; flex-shrink: 0; background: var(--chip);
   }
   .unrow .t {
-    font-size: 14px; font-weight: 600; line-height: 1.35; color: #2b2b45;
+    font-size: 14px; font-weight: 500; line-height: 20px; color: var(--txt);
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .unrow .np { display: none; font-size: 12.5px; font-weight: 700; color: #ff5d8f; margin-top: 4px; }
-  .unrow.playing { background: #ffe3ec; }
+  .unrow .c { font-size: 12px; color: var(--txt2); margin-top: 4px; }
+  .unrow .np { display: none; font-size: 12px; font-weight: 500; color: var(--red); margin-top: 4px; }
+  .unrow.playing { background: var(--chip); }
   .unrow.playing .np { display: block; }
 
-  @media (max-width: 900px) {
-    #watch { padding: 0; }
-    .watch-layout { grid-template-columns: 1fr; gap: 0; }
-    .stage { border-radius: 0; position: sticky; top: 0; z-index: 50; }
-    #watchTitle { margin: 12px 16px 4px; font-size: 17px; }
-    .upnext { padding: 12px 10px; }
-    .upnext h2 { margin: 8px 6px; }
-    body.watch-mode header { display: none; }   /* like the YouTube app: player at the very top */
-  }
-
-  /* ── Player overlay ─────────────────────── */
-  #overlay {
-    position: fixed; inset: 0; z-index: 100;
-    background: #0d0d1a; overflow: hidden;
-    touch-action: none; overscroll-behavior: contain;
-  }
-  #track {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    will-change: transform;
-  }
-  #track.anim { transition: transform .28s cubic-bezier(.2, .7, .3, 1); }
-
-  /* Shorts panels: three stacked players (prev / current / next), preloaded */
-  .spanel {
-    position: absolute; left: 0; width: 100%; height: 100%;
-    display: none; align-items: center; justify-content: center;
-  }
-  .shorts-mode .spanel { display: flex; }
-  .spanel.pos-prev { top: -100%; }
-  .spanel.pos-cur { top: 0; }
-  .spanel.pos-next { top: 100%; }
-  .sbox {
-    position: relative; overflow: hidden;
-    width: min(100vw, 56.25vh); aspect-ratio: 9 / 16;
-    background: #16162a;
-  }
-  .sbox iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* ── Player stage (watch) ───────────────── */
   .stage {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    background: #000;
-    border-radius: 14px;
-    overflow: hidden;
+    position: relative; width: 100%; aspect-ratio: 16 / 9;
+    background: #000; border-radius: 12px; overflow: hidden;
   }
   .stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
-
-  /* The shield: catches every tap so nothing inside the iframe is clickable */
   #shield { position: absolute; inset: 0; z-index: 2; touch-action: none; }
-
-  /* Poster: covers a panel until its video is actually playing */
-  .sposter { position: absolute; inset: 0; z-index: 1; background: #16162a; }
-  .sposter img { width: 100%; height: 100%; object-fit: cover; }
-  .sposter .spinner {
-    position: absolute; inset: 0; margin: auto;
-    width: 46px; height: 46px; border-radius: 50%;
-    border: 4px solid rgba(255,255,255,.25); border-top-color: #ff5d8f;
-    animation: spin .8s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Shorts-mode chrome: tap shield + back button + thin progress bar, fixed over the sliding panels */
-  #shortsUI { display: none; }
-  .shorts-mode #shortsUI { display: block; }
-  #sShield { position: absolute; inset: 0; z-index: 2; touch-action: none; }
-  #sBack { position: absolute; top: 14px; left: 14px; z-index: 3; }
-  #shortsBar {
-    position: absolute; left: 0; right: 0; bottom: 0; height: 3px; z-index: 3;
-    background: rgba(255,255,255,.2);
-  }
-  #shortsFill { height: 100%; width: 0%; background: #ff5d8f; }
 
   .bar {
     position: absolute; left: 0; right: 0; z-index: 3;
     display: flex; align-items: center; gap: 14px;
-    padding: 14px 18px;
+    padding: 8px 12px;
     transition: opacity .25s;
   }
-  #topbar { top: 0; background: linear-gradient(rgba(0,0,0,.65), transparent); }
-  #botbar { bottom: 0; background: linear-gradient(transparent, rgba(0,0,0,.75)); }
+  #topbar { top: 0; background: linear-gradient(rgba(0,0,0,.6), transparent); }
   .stage.hide-ui .bar { opacity: 0; pointer-events: none; }
-
-  #vtitle { color: #fff; font-size: 17px; font-weight: 600; flex: 1;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
   .cbtn {
     border: none; cursor: pointer; flex-shrink: 0;
-    width: 52px; height: 52px; border-radius: 50%;
-    font-size: 22px; color: #fff;
-    background: rgba(255,255,255,.18);
+    width: 40px; height: 40px; border-radius: 50%;
+    font-size: 20px; color: #fff;
+    background: rgba(0,0,0,.35);
     display: grid; place-items: center;
-    transition: background .15s, transform .1s;
   }
-  .cbtn:hover { background: rgba(255,255,255,.32); }
-  .cbtn:active { transform: scale(.92); }
+  .cbtn:hover { background: rgba(0,0,0,.55); }
+  #vtitle { color: #fff; font-size: 15px; font-weight: 500; flex: 1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  /* YouTube-style control bar: thin red seek bar above a row of flat white icons */
+  /* YouTube-style control bar */
   #botbar {
-    flex-direction: column; align-items: stretch; gap: 0;
+    bottom: 0; flex-direction: column; align-items: stretch; gap: 0;
     padding: 0 10px 2px;
     background: linear-gradient(transparent, rgba(0,0,0,.8));
   }
@@ -215,13 +260,13 @@
     width: 100%; height: 3px; margin: 10px 0 2px;
     border-radius: 0; cursor: pointer;
     background: rgba(255,255,255,.3);
-    accent-color: #f00;
+    accent-color: var(--red);
   }
   #seek:hover { height: 5px; }
   #seek::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 13px; height: 13px; border-radius: 50%;
-    background: #f00; border: none;
+    background: var(--red); border: none;
     opacity: 0; transition: opacity .1s;
   }
   #botbar:hover #seek::-webkit-slider-thumb, #seek:active::-webkit-slider-thumb { opacity: 1; }
@@ -242,7 +287,6 @@
   #fsBtn .ico-exit { display: none; }
   #fsBtn.is-fs .ico-exit { display: block; }
   #fsBtn.is-fs .ico-enter { display: none; }
-  /* CSS fallback "fullscreen" for browsers without the Fullscreen API (e.g. iPhone Safari) */
   .stage.fake-fs {
     position: fixed !important; inset: 0; z-index: 300;
     width: 100vw; height: 100vh; aspect-ratio: auto; border-radius: 0;
@@ -254,7 +298,7 @@
     text-shadow: 0 1px 2px rgba(0,0,0,.5);
   }
 
-  /* Big center play button (shown when paused), styled like YouTube's */
+  /* Big center play button, styled like YouTube's */
   #bigPlay {
     position: absolute; inset: 0; z-index: 2; margin: auto;
     width: 68px; height: 48px; border-radius: 12px;
@@ -263,16 +307,79 @@
     display: grid; place-items: center;
     transition: background .1s;
   }
-  #bigPlay:hover { background: #f00; }
+  #bigPlay:hover { background: var(--red); }
   #bigPlay svg { width: 30px; height: 30px; fill: #fff; }
+
+  /* ── Shorts overlay ─────────────────────── */
+  #overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: #000; overflow: hidden;
+    touch-action: none; overscroll-behavior: contain;
+  }
+  #track {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    will-change: transform;
+  }
+  #track.anim { transition: transform .28s cubic-bezier(.2, .7, .3, 1); }
+  .spanel {
+    position: absolute; left: 0; width: 100%; height: 100%;
+    display: none; align-items: center; justify-content: center;
+  }
+  .shorts-mode .spanel { display: flex; }
+  .spanel.pos-prev { top: -100%; }
+  .spanel.pos-cur { top: 0; }
+  .spanel.pos-next { top: 100%; }
+  .sbox {
+    position: relative; overflow: hidden;
+    width: min(100vw, 56.25vh); aspect-ratio: 9 / 16;
+    background: #111;
+  }
+  .sbox iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .sposter { position: absolute; inset: 0; z-index: 1; background: #111; }
+  .sposter img { width: 100%; height: 100%; object-fit: cover; }
+  .sposter .spinner {
+    position: absolute; inset: 0; margin: auto;
+    width: 46px; height: 46px; border-radius: 50%;
+    border: 4px solid rgba(255,255,255,.25); border-top-color: var(--red);
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Shorts chrome: shield, back, right-side action rail, thin progress bar */
+  #shortsUI { display: none; }
+  .shorts-mode #shortsUI { display: block; }
+  #sShield { position: absolute; inset: 0; z-index: 2; touch-action: none; }
+  #sBack { position: absolute; top: 14px; left: 14px; z-index: 3; }
+  #srail {
+    position: absolute; z-index: 3;
+    right: calc(50% - min(50vw, 28.125vh) + 8px);
+    bottom: 24px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .railbtn {
+    border: none; cursor: pointer;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    display: grid; place-items: center;
+  }
+  .railbtn:hover { background: rgba(255,255,255,.3); }
+  .railbtn svg { width: 24px; height: 24px; fill: #fff; }
+  .railbtn.liked { background: #fff; }
+  .railbtn.liked svg { fill: var(--red); }
+  #shortsBar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 3px; z-index: 3;
+    background: rgba(255,255,255,.2);
+  }
+  #shortsFill { height: 100%; width: 0%; background: var(--red); }
 
   /* ── Toast & warning banner ─────────────── */
   #toast {
     position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
-    z-index: 200; max-width: min(90vw, 480px);
-    background: #2b2b45; color: #fff;
-    font-size: 15px; font-weight: 500; line-height: 1.4;
-    padding: 12px 20px; border-radius: 14px;
+    z-index: 400; max-width: min(90vw, 480px);
+    background: #212121; color: #fff;
+    font-size: 14px; line-height: 1.4;
+    padding: 12px 20px; border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0,0,0,.35);
     opacity: 0; pointer-events: none; transition: opacity .25s;
   }
@@ -280,18 +387,37 @@
   #warnBanner {
     background: #fff3cd; color: #7a5c00;
     border-bottom: 2px solid #ffe08a;
-    padding: 12px 20px; font-size: 15px; line-height: 1.5;
+    padding: 12px 20px; font-size: 14px; line-height: 1.5;
   }
-  #warnBanner code { background: #ffe9a8; padding: 2px 6px; border-radius: 6px; font-size: 13.5px; }
+  #warnBanner code { background: #ffe9a8; padding: 2px 6px; border-radius: 6px; font-size: 13px; }
 
+  /* ── Responsive ─────────────────────────── */
+  @media (max-width: 900px) {
+    #sidebar { display: none; }
+    #bottomnav { display: flex; }
+    main { padding-bottom: 88px; }
+    #watch { padding: 0 0 72px; }
+    .watch-layout { grid-template-columns: 1fr; gap: 0; }
+    .stage { border-radius: 0; position: sticky; top: 0; z-index: 55; }
+    #watchTitle { margin: 12px 16px 8px; font-size: 17px; line-height: 24px; }
+    .wchrow { margin: 0 16px 8px; }
+    .wacts { margin-left: 0; width: 100%; }
+    .upnext { padding: 8px 12px; }
+    body.watch-mode header, body.watch-mode #bottomnav, body.watch-mode #chips { display: none; }
+  }
   @media (max-width: 600px) {
-    main { padding: 16px; }
-    .grid { gap: 14px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-    .grid.reels { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
-    .logo { font-size: 21px; }
-    .tab { font-size: 15px; padding: 8px 16px; }
-    .cbtn { width: 44px; height: 44px; font-size: 18px; }
-    .ybtn { width: 42px; height: 38px; }
+    header { padding: 0 8px; }
+    #searchWrap { margin: 0 4px; }
+    .logo span { font-size: 17px; }
+    main { padding-left: 0; padding-right: 0; }
+    #chips { top: 56px; }
+    .grid { gap: 24px 0; grid-template-columns: 1fr; }
+    .grid .thumb { border-radius: 0; }
+    .grid .cinfo { padding: 12px 12px 0; }
+    .grid.reels { grid-template-columns: repeat(2, 1fr); gap: 16px 4px; padding: 0 4px; }
+    .grid.reels .thumb { border-radius: 8px; }
+    .grid.reels .cinfo { padding: 8px 8px 0; }
+    .empty { padding: 40px 16px; }
   }
 </style>
 </head>
@@ -305,54 +431,99 @@
 </div>
 
 <header>
-  <span class="logo" id="siteName"></span>
-  <nav>
-    <button class="tab active" data-mode="videos">📺 Videos</button>
-    <button class="tab" data-mode="reels">🎬 Shorts</button>
-  </nav>
+  <button class="iconbtn" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg></button>
+  <button class="logo" id="logoBtn" aria-label="Home">
+    <svg viewBox="0 0 30 21"><rect width="30" height="21" rx="5" fill="#f00"/><path d="M12 5.5v10l8.5-5z" fill="#fff"/></svg>
+    <span id="siteName"></span>
+  </button>
+  <div id="searchWrap">
+    <input id="searchInput" type="search" placeholder="Search" autocomplete="off">
+    <button id="searchBtn" aria-label="Search"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg></button>
+  </div>
+  <div id="avatar">K</div>
 </header>
 
-<main id="mainView">
-  <div id="videoGrid" class="grid"></div>
-  <div id="reelGrid" class="grid reels hidden"></div>
-</main>
+<div id="page">
+  <div id="sidebar">
+    <button class="navbtn active" data-view="home">
+      <svg class="on" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <svg class="off" viewBox="0 0 24 24"><path d="M12 5.7l5 4.5V18h-2v-6H9v6H7v-7.8l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="navbtn" data-view="shorts">
+      <svg class="on" viewBox="0 0 24 24"><path d="M17.77 10.32l-1.6-.83L17.5 8.7a4 4 0 0 0-3.9-6.94L5.9 5.9a4 4 0 0 0 .33 7.78l1.6.83-1.33.79a4 4 0 0 0 3.9 6.94l7.7-4.14a4 4 0 0 0-.33-7.78zM10 14.5v-5l4.5 2.5z"/></svg>
+      <svg class="off" viewBox="0 0 24 24"><path d="M17.77 10.32l-1.6-.83L17.5 8.7a4 4 0 0 0-3.9-6.94L5.9 5.9a4 4 0 0 0 .33 7.78l1.6.83-1.33.79a4 4 0 0 0 3.9 6.94l7.7-4.14a4 4 0 0 0-.33-7.78zM10 14.5v-5l4.5 2.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+      <span>Shorts</span>
+    </button>
+  </div>
 
-<div id="watch" class="hidden">
-  <div class="watch-layout">
-    <div class="watch-main">
-      <div class="stage" id="stage">
-        <div id="yt"></div>
-        <div id="shield"></div>
-        <button id="bigPlay" class="hidden" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
-        <div class="bar" id="topbar">
-          <button class="cbtn" id="backBtn" aria-label="Back">←</button>
-          <span id="vtitle"></span>
-        </div>
-        <div class="bar" id="botbar">
-          <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
-          <div id="ybtns">
-            <button class="ybtn" id="prevBtn" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
-            <button class="ybtn" id="playBtn" aria-label="Play/Pause">
-              <svg class="ico-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              <svg class="ico-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-            </button>
-            <button class="ybtn" id="nextBtn" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
-            <span id="timeLbl">0:00 / 0:00</span>
-            <button class="ybtn" id="fsBtn" aria-label="Fullscreen">
-              <svg class="ico-enter" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
-              <svg class="ico-exit" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
-            </button>
+  <div id="content">
+    <div id="chips"></div>
+    <main id="mainView">
+      <div id="videoGrid" class="grid"></div>
+      <div id="reelGrid" class="grid reels hidden"></div>
+    </main>
+
+    <div id="watch" class="hidden">
+      <div class="watch-layout">
+        <div class="watch-main">
+          <div class="stage" id="stage">
+            <div id="yt"></div>
+            <div id="shield"></div>
+            <button id="bigPlay" class="hidden" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+            <div class="bar" id="topbar">
+              <button class="cbtn" id="backBtn" aria-label="Back">←</button>
+              <span id="vtitle"></span>
+            </div>
+            <div class="bar" id="botbar">
+              <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
+              <div id="ybtns">
+                <button class="ybtn" id="prevBtn" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+                <button class="ybtn" id="playBtn" aria-label="Play/Pause">
+                  <svg class="ico-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  <svg class="ico-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                </button>
+                <button class="ybtn" id="nextBtn" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+                <span id="timeLbl">0:00 / 0:00</span>
+                <button class="ybtn" id="fsBtn" aria-label="Fullscreen">
+                  <svg class="ico-enter" viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+                  <svg class="ico-exit" viewBox="0 0 24 24"><path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/></svg>
+                </button>
+              </div>
+            </div>
+          </div>
+          <h1 id="watchTitle"></h1>
+          <div class="wchrow">
+            <span id="wchAvatar"></span>
+            <span id="wchName"></span>
+            <button class="subbtn">Subscribe</button>
+            <div class="wacts">
+              <button class="pill" id="likeBtn"><svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg>Like</button>
+              <button class="pill"><svg viewBox="0 0 24 24"><path d="M14 9V5l7 7-7 7v-4.1c-5 0-8.5 1.6-11 5.1 1-5 4-10 11-11z"/></svg>Share</button>
+            </div>
           </div>
         </div>
+        <aside class="upnext">
+          <h2>Up next</h2>
+          <div id="upNextList"></div>
+        </aside>
       </div>
-      <h1 id="watchTitle"></h1>
     </div>
-    <aside class="upnext">
-      <h2>Up next</h2>
-      <div id="upNextList"></div>
-    </aside>
   </div>
 </div>
+
+<nav id="bottomnav">
+  <button class="navbtn active" data-view="home">
+    <svg class="on" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+    <svg class="off" viewBox="0 0 24 24"><path d="M12 5.7l5 4.5V18h-2v-6H9v6H7v-7.8l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/></svg>
+    <span>Home</span>
+  </button>
+  <button class="navbtn" data-view="shorts">
+    <svg class="on" viewBox="0 0 24 24"><path d="M17.77 10.32l-1.6-.83L17.5 8.7a4 4 0 0 0-3.9-6.94L5.9 5.9a4 4 0 0 0 .33 7.78l1.6.83-1.33.79a4 4 0 0 0 3.9 6.94l7.7-4.14a4 4 0 0 0-.33-7.78zM10 14.5v-5l4.5 2.5z"/></svg>
+    <svg class="off" viewBox="0 0 24 24"><path d="M17.77 10.32l-1.6-.83L17.5 8.7a4 4 0 0 0-3.9-6.94L5.9 5.9a4 4 0 0 0 .33 7.78l1.6.83-1.33.79a4 4 0 0 0 3.9 6.94l7.7-4.14a4 4 0 0 0-.33-7.78zM10 14.5v-5l4.5 2.5z" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+    <span>Shorts</span>
+  </button>
+</nav>
 
 <div id="overlay" class="hidden">
   <div id="track">
@@ -363,6 +534,12 @@
   <div id="shortsUI">
     <div id="sShield"></div>
     <button class="cbtn" id="sBack" aria-label="Back">←</button>
+    <div id="srail">
+      <button class="railbtn" id="sLike" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg></button>
+      <button class="railbtn" aria-label="Dislike"><svg viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg></button>
+      <button class="railbtn" aria-label="Comments"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg></button>
+      <button class="railbtn" aria-label="Share"><svg viewBox="0 0 24 24"><path d="M14 9V5l7 7-7 7v-4.1c-5 0-8.5 1.6-11 5.1 1-5 4-10 11-11z"/></svg></button>
+    </div>
     <div id="shortsBar"><div id="shortsFill"></div></div>
   </div>
 </div>
@@ -375,141 +552,139 @@
 
    To add a video: copy its YouTube URL, take the ID (the part
    after "watch?v=" or "youtu.be/" or "/shorts/"), and add a line:
-       { id: "VIDEO_ID", title: "Name your child will see" },
-
-   The samples below are placeholders — replace them with your list.
+       { id: "VIDEO_ID", title: "Name shown", ch: "Channel name" },
    ═══════════════════════════════════════════════════════════════ */
 
-const SITE_NAME = "★ Kiddo TV";
+const SITE_NAME = "KiddoTV";
 
 const AUTOPLAY_NEXT = true;   // when a video ends, play the next one in the list
 
 const VIDEOS = [
-  // — Super Simple Songs - Kids Songs —
-  { id: "LLgTFZP3IQQ", title: "Top 20 Back To School Songs" },
-  { id: "YaFSwBg1qvg", title: "Put on Your Shoes" },
-  { id: "BG8HLIvuK24", title: "Top 20 Counting Songs" },
-  { id: "-HOQGg7uuQQ", title: "Counting Up To 20" },
-  { id: "jZnBNf0GJyU", title: "Top 20 Book Songs 📚" },
-  // — Bluey - Official Channel —
-  { id: "iPnLwR26BvI", title: "Keepy Uppy 🎈" },
-  { id: "fnoFXhmy4-c", title: "🔴 LIVE: Bandit won't stop teasing!😂💙" },
-  { id: "i6yHNspt_GI", title: "🔴 LIVE: Pom Pom plays Pass the Parcel! 💙🎁" },
-  { id: "jzUR0G9aJyg", title: "🔴LIVE: Bluey and her Friends play Circus!💙🎪" },
-  { id: "UtxqHTxzQbU", title: "Bluey Makes Pizzas for Mum and Dad 🍕 ☺️" },
-  // — ChuChu TV Nursery Rhymes & Kids Songs —
-  { id: "jgYSNnDEVuA", title: "Letter A to H Songs" },
-  { id: "WE7XxoY74KY", title: "The Great Bubble Chase! Playtime Fun" },
-  { id: "7cIKO4ZuXHw", title: "How to Draw Savanna Animals for Kids" },
-  { id: "QTa-tX3UaJs", title: "Dinosaur Songs for Kids" },
-  { id: "wQHEOVv9ZfI", title: "Bestie and Friends - Pickleball Pranks! 🏓" },
-  // — Peppa Pig - Official Channel —
-  { id: "L5CCBmHyrMM", title: "Peppa Pig 2026 NEWEST Episodes 🐷 Best of Season 10 & 11! 🤩 Summer Adventures 🗺️" },
-  { id: "3MQVTqA_feI", title: "🔴 LIVE: Cutest Baby Evie Episode 🍼 Peppa Pig Best Big Sister Moments✨Kids Cartoons 🐷 FULL Episodes" },
-  { id: "MrbSRl_7-ME", title: "Ice Hockey RIVALRY At Penny Polar Bear's Party! 🎂🏒🔥 Peppa Pig Full Episodes" },
-  { id: "xzxV9-3Vvf0", title: "Peppa RESCUES Baby Duck on Bike Ride! 🐥🚲 Peppa Pig Tales Episodes" },
-  { id: "vzkQB1Jc7mo", title: "🥠 Peppa Goes to YUMMY Chinese BUFFET 🥢 ALL You Can EAT! 😱 BRAND NEW Peppa Pig Tales Episodes" },
+  // — Super Simple Songs —
+  { id: "LLgTFZP3IQQ", title: "Top 20 Back To School Songs", ch: "Super Simple Songs" },
+  { id: "YaFSwBg1qvg", title: "Put on Your Shoes", ch: "Super Simple Songs" },
+  { id: "BG8HLIvuK24", title: "Top 20 Counting Songs", ch: "Super Simple Songs" },
+  { id: "-HOQGg7uuQQ", title: "Counting Up To 20", ch: "Super Simple Songs" },
+  { id: "jZnBNf0GJyU", title: "Top 20 Book Songs 📚", ch: "Super Simple Songs" },
+  // — Bluey —
+  { id: "iPnLwR26BvI", title: "Keepy Uppy 🎈", ch: "Bluey" },
+  { id: "fnoFXhmy4-c", title: "🔴 LIVE: Bandit won't stop teasing!😂💙", ch: "Bluey" },
+  { id: "i6yHNspt_GI", title: "🔴 LIVE: Pom Pom plays Pass the Parcel! 💙🎁", ch: "Bluey" },
+  { id: "jzUR0G9aJyg", title: "🔴LIVE: Bluey and her Friends play Circus!💙🎪", ch: "Bluey" },
+  { id: "UtxqHTxzQbU", title: "Bluey Makes Pizzas for Mum and Dad 🍕 ☺️", ch: "Bluey" },
+  // — ChuChu TV —
+  { id: "jgYSNnDEVuA", title: "Letter A to H Songs", ch: "ChuChu TV" },
+  { id: "WE7XxoY74KY", title: "The Great Bubble Chase! Playtime Fun", ch: "ChuChu TV" },
+  { id: "7cIKO4ZuXHw", title: "How to Draw Savanna Animals for Kids", ch: "ChuChu TV" },
+  { id: "QTa-tX3UaJs", title: "Dinosaur Songs for Kids", ch: "ChuChu TV" },
+  { id: "wQHEOVv9ZfI", title: "Bestie and Friends - Pickleball Pranks! 🏓", ch: "ChuChu TV" },
+  // — Peppa Pig —
+  { id: "L5CCBmHyrMM", title: "Peppa Pig 2026 NEWEST Episodes 🐷 Best of Season 10 & 11! 🤩 Summer Adventures 🗺️", ch: "Peppa Pig" },
+  { id: "3MQVTqA_feI", title: "🔴 LIVE: Cutest Baby Evie Episode 🍼 Peppa Pig Best Big Sister Moments✨Kids Cartoons 🐷 FULL Episodes", ch: "Peppa Pig" },
+  { id: "MrbSRl_7-ME", title: "Ice Hockey RIVALRY At Penny Polar Bear's Party! 🎂🏒🔥 Peppa Pig Full Episodes", ch: "Peppa Pig" },
+  { id: "xzxV9-3Vvf0", title: "Peppa RESCUES Baby Duck on Bike Ride! 🐥🚲 Peppa Pig Tales Episodes", ch: "Peppa Pig" },
+  { id: "vzkQB1Jc7mo", title: "🥠 Peppa Goes to YUMMY Chinese BUFFET 🥢 ALL You Can EAT! 😱 BRAND NEW Peppa Pig Tales Episodes", ch: "Peppa Pig" },
   // — Numberblocks —
-  { id: "ucLv2D0o3eQ", title: "I Can't Sleep! - Counting Sheep" },
-  { id: "Vz9kT3Ntbw0", title: "Thank You for 15 Million Subscribers!!! 🥳🎉" },
-  { id: "_pjA7_SY21E", title: "Land of the Giants! - Big Numbers for Big kids" },
-  { id: "bWSI5S2LYmk", title: "Whose House is this? - Numberblocks Homes" },
-  { id: "05cqSSwJEgE", title: "Let's Make Rainbow Slime" },
+  { id: "ucLv2D0o3eQ", title: "I Can't Sleep! - Counting Sheep", ch: "Numberblocks" },
+  { id: "Vz9kT3Ntbw0", title: "Thank You for 15 Million Subscribers!!! 🥳🎉", ch: "Numberblocks" },
+  { id: "_pjA7_SY21E", title: "Land of the Giants! - Big Numbers for Big kids", ch: "Numberblocks" },
+  { id: "bWSI5S2LYmk", title: "Whose House is this? - Numberblocks Homes", ch: "Numberblocks" },
+  { id: "05cqSSwJEgE", title: "Let's Make Rainbow Slime", ch: "Numberblocks" },
   // — Sesame Street —
-  { id: "mIXu9K24g30", title: "Go for the Gold 🌟 🌟 🌟 (Golden Parody)" },
-  { id: "d5lKPl5qCkk", title: "Fun with STEM 🔭 🧮 Building and Counting with Elmo" },
-  { id: "yaD0n5awR_E", title: "Dinosaur Time with Elmo! 🦖 🦕" },
-  { id: "Sabpxv77cfY", title: "A Day at School with Elmo, Abby, & Cookie Monster! 🎒 🚌 📝" },
-  { id: "Q934OTUJ-y0", title: "Sesame Street Full Episodes!🔴Learn ABCs, 123s, Nursery Rhymes, & MORE" },
-  // — Baby Shark - Pinkfong Kids’ Songs & Stories —
-  { id: "3tGwOyLPyrU", title: "[🚨NEW] Eeh Ooh! Catch the Thieves" },
-  { id: "5aO1MzkRRaA", title: "[BEST 26] Kids’ Favorite Baby Shark Dance Songs" },
-  { id: "gsN0DaxECdU", title: "Where Is Baby Shark’s Tail?" },
-  { id: "CUPJEtxN6iU", title: "🎵My First Concert Live! l Pinkfong & Baby Shark" },
-  // — Little Baby Bum - Nursery Rhymes & Kids Songs —
-  { id: "BFIOE2jKZbA", title: "Max and Twinkle’s Magic Shape Safari! 🪄✨ LBB New Look VS Classic Look" },
-  { id: "m02ZlHGaepU", title: "Mia’s Perfect Picnic Day! 🧺" },
-  { id: "4Z12ihnmYTI", title: "We Visit the Dino Museum! 🦖🏛️ Wheels On the Bus" },
-  { id: "OIyBrKTy0OY", title: "Twinkle & Monkey Bathtime🛁👶 LBB New Look VS Classic Look" },
-  // — Cocomelon - Nursery Rhymes —
-  { id: "_cmxOYRWYQA", title: "Freeze Dance Challenge" },
-  { id: "vFdBQ64gZf4", title: "Humpty Dumpty at School with JJ's Friends" },
-  { id: "O0nV7hJ9qzk", title: "Potty Training Song" },
-  { id: "Gfcybr0q-HA", title: "Bus Wash Song and Wheels on the Animal Bus" },
-  // — Dave and Ava - Nursery Rhymes and Baby Songs —
-  { id: "hrEJ9Q9AA4A", title: "​​😻 Opposites for Kids and Nursery Rhymes" },
-  { id: "_6R8Q-NPkIM", title: "🤩 Three Little Kittens" },
-  { id: "1CirznQKdDg", title: "😁 Nursery Rhymes and Kids Songs" },
-  { id: "XlpE3Gw_HIQ", title: "​​😁 Opposites for Kids and Nursery Rhymes" },
-  // — Blippi - Educational Videos for Kids —
-  { id: "mXnKExSeaUw", title: "Blippi's Super Silly Vehicle Race! 🏎️" },
-  { id: "cn4cxq6m7sU", title: "Blippi's Best Space Aventures! 🚀 Top 5 Special" },
-  { id: "Q35dLHdxhDc", title: "PAW Patrol & Blippi's Rescue Mission on Dino Island! 🦖" },
-  { id: "2T2ufNy9Lw0", title: "Blippi’s Back to School Special! 🏫" },
+  { id: "mIXu9K24g30", title: "Go for the Gold 🌟 🌟 🌟 (Golden Parody)", ch: "Sesame Street" },
+  { id: "d5lKPl5qCkk", title: "Fun with STEM 🔭 🧮 Building and Counting with Elmo", ch: "Sesame Street" },
+  { id: "yaD0n5awR_E", title: "Dinosaur Time with Elmo! 🦖 🦕", ch: "Sesame Street" },
+  { id: "Sabpxv77cfY", title: "A Day at School with Elmo, Abby, & Cookie Monster! 🎒 🚌 📝", ch: "Sesame Street" },
+  { id: "Q934OTUJ-y0", title: "Sesame Street Full Episodes!🔴Learn ABCs, 123s, Nursery Rhymes, & MORE", ch: "Sesame Street" },
+  // — Pinkfong —
+  { id: "3tGwOyLPyrU", title: "[🚨NEW] Eeh Ooh! Catch the Thieves", ch: "Pinkfong" },
+  { id: "5aO1MzkRRaA", title: "[BEST 26] Kids’ Favorite Baby Shark Dance Songs", ch: "Pinkfong" },
+  { id: "gsN0DaxECdU", title: "Where Is Baby Shark’s Tail?", ch: "Pinkfong" },
+  { id: "CUPJEtxN6iU", title: "🎵My First Concert Live! l Pinkfong & Baby Shark", ch: "Pinkfong" },
+  // — Little Baby Bum —
+  { id: "BFIOE2jKZbA", title: "Max and Twinkle’s Magic Shape Safari! 🪄✨ LBB New Look VS Classic Look", ch: "Little Baby Bum" },
+  { id: "m02ZlHGaepU", title: "Mia’s Perfect Picnic Day! 🧺", ch: "Little Baby Bum" },
+  { id: "4Z12ihnmYTI", title: "We Visit the Dino Museum! 🦖🏛️ Wheels On the Bus", ch: "Little Baby Bum" },
+  { id: "OIyBrKTy0OY", title: "Twinkle & Monkey Bathtime🛁👶 LBB New Look VS Classic Look", ch: "Little Baby Bum" },
+  // — Cocomelon —
+  { id: "_cmxOYRWYQA", title: "Freeze Dance Challenge", ch: "Cocomelon" },
+  { id: "vFdBQ64gZf4", title: "Humpty Dumpty at School with JJ's Friends", ch: "Cocomelon" },
+  { id: "O0nV7hJ9qzk", title: "Potty Training Song", ch: "Cocomelon" },
+  { id: "Gfcybr0q-HA", title: "Bus Wash Song and Wheels on the Animal Bus", ch: "Cocomelon" },
+  // — Dave and Ava —
+  { id: "hrEJ9Q9AA4A", title: "​​😻 Opposites for Kids and Nursery Rhymes", ch: "Dave and Ava" },
+  { id: "_6R8Q-NPkIM", title: "🤩 Three Little Kittens", ch: "Dave and Ava" },
+  { id: "1CirznQKdDg", title: "😁 Nursery Rhymes and Kids Songs", ch: "Dave and Ava" },
+  { id: "XlpE3Gw_HIQ", title: "​​😁 Opposites for Kids and Nursery Rhymes", ch: "Dave and Ava" },
+  // — Blippi —
+  { id: "mXnKExSeaUw", title: "Blippi's Super Silly Vehicle Race! 🏎️", ch: "Blippi" },
+  { id: "cn4cxq6m7sU", title: "Blippi's Best Space Aventures! 🚀 Top 5 Special", ch: "Blippi" },
+  { id: "Q35dLHdxhDc", title: "PAW Patrol & Blippi's Rescue Mission on Dino Island! 🦖", ch: "Blippi" },
+  { id: "2T2ufNy9Lw0", title: "Blippi’s Back to School Special! 🏫", ch: "Blippi" },
 ];
 
 const REELS = [
-  // — Blippi - Educational Videos for Kids —
-  { id: "dtYXraDuZ6U", title: "Bada Bing Bada BOOM! 💥 Blippi Builds a Blue Train! 🚂" },
-  { id: "g_jO2V8ZPmE", title: "Sink or Float ⚖️💧 Let's Test Trains, Planes, Cars and Boats" },
-  { id: "M-9yUuzFf00", title: "What Vehicle Carries the MOST Candy? 🍬 Toy Vehicle Challenge" },
-  { id: "a_v0YX0Nqjo", title: "Can You GUESS the Sand Vehicles? 🚗🏖️ Summer Vehicle Challenge" },
-  { id: "y9YvWyH5eWg", title: "Blippi Builds a FRUIT Monster Truck! 🍓🛻" },
-  { id: "L91B_OiWgQA", title: "Blippi Meets a Kid with his OWN AIRPLANE? ✈️ Big Vehicles, Bigger Questions" },
-  // — Dave and Ava - Nursery Rhymes and Baby Songs —
-  { id: "wy-NNbVqfRw", title: "😁 Brush Brush Brush Your Teeth" },
-  { id: "M9_gNhxrFpE", title: "🤪 Down by the Bay Part 1" },
-  { id: "eOTRgxr281o", title: "😁 Oscar Song" },
-  { id: "Idfq14FRc1o", title: "🤩 Phonics Song – Part 2" },
-  { id: "5TnsXPrMw8g", title: "😜 Ten in the Bed" },
-  { id: "tPIn4j0X-yE", title: "🤩 Wheels on the Bus" },
-  // — Little Baby Bum - Nursery Rhymes & Kids Songs —
-  { id: "iswsx8fvM3k", title: "Animal Circus Show! 🎪🐘" },
-  { id: "4_pXV7zTRWQ", title: "Guess the Vehicle by Shape! 🚒💨" },
-  { id: "mgYhkhDax3c", title: "Yellow Bus or Orange Bus? 🎵🚌 Wheels On The Bus" },
-  { id: "jldmxx-1qds", title: "Let's Make Twinkle Star 🎨⭐" },
-  { id: "f-_NvvFxjjc", title: "Color Wheel With Little Baby Bum! 🚌Color Bus Song" },
-  { id: "HXjGs4QOkwM", title: "Colorful Sharks 🦈✨" },
-  // — Cocomelon - Nursery Rhymes —
-  { id: "4nsWmFt2bPU", title: "It's Time for Bed, JJ! Goodnight! 😴💤🌙" },
-  { id: "lIjx8WqqpxI", title: "Let's Decorate JJ's School Backpack! 🎒 Easy CoComelon Crafts 🎨" },
-  { id: "AGZFMMgMIEo", title: "I Love to Go to School! ❤️🚌 Back to School Bus Toy Play" },
-  { id: "7NMvvPL76tU", title: "Pat-a-Cake! Sing Along with JJ & Cody 🎂" },
-  { id: "gJ_8xQ8a7ME", title: "Let's Stack Healthy Fruit with JJ! 🍎🍉🍊🍍🍌" },
-  // — Baby Shark - Pinkfong Kids’ Songs & Stories —
-  { id: "Nn3xWy5S9Cs", title: "Happy Shark Month! 🦈 Learn the ABCs with Baby Shark Doo Doo Doo" },
-  { id: "GX6vhEixkLc", title: "Move & Groove to the Monkey Banana Song with Melody 🐒" },
-  { id: "w8ttk0Msa90", title: "Ready for Your First Concert? 🎵✨" },
-  { id: "zgfvooa05wc", title: "⌨️ Let’s Do Sensory Play with a Keyboard" },
-  { id: "UZCiGPiLE0I", title: "Where is the Shark Family hiding? 🖐️Sing the Shark Finger Family Song to find them" },
-  // — Peppa Pig - Official Channel —
-  { id: "PrHx7D8uW-I", title: "Baby Evie Starts TEETHING! 🦷😩" },
-  { id: "bPL1S56z1As", title: "Peppa's PHONE CALL! 📞" },
-  { id: "NuoOtCSjG5Y", title: "Help George FIND his hearing aid! 🦻" },
-  { id: "H1WDhcOFqHg", title: "Baby Evie's in JAIL! 🚔" },
-  { id: "3IGG3MBsnIA", title: "MYSTERY Button" },
+  // — Blippi —
+  { id: "dtYXraDuZ6U", title: "Bada Bing Bada BOOM! 💥 Blippi Builds a Blue Train! 🚂", ch: "Blippi" },
+  { id: "g_jO2V8ZPmE", title: "Sink or Float ⚖️💧 Let's Test Trains, Planes, Cars and Boats", ch: "Blippi" },
+  { id: "M-9yUuzFf00", title: "What Vehicle Carries the MOST Candy? 🍬 Toy Vehicle Challenge", ch: "Blippi" },
+  { id: "a_v0YX0Nqjo", title: "Can You GUESS the Sand Vehicles? 🚗🏖️ Summer Vehicle Challenge", ch: "Blippi" },
+  { id: "y9YvWyH5eWg", title: "Blippi Builds a FRUIT Monster Truck! 🍓🛻", ch: "Blippi" },
+  { id: "L91B_OiWgQA", title: "Blippi Meets a Kid with his OWN AIRPLANE? ✈️ Big Vehicles, Bigger Questions", ch: "Blippi" },
+  // — Dave and Ava —
+  { id: "wy-NNbVqfRw", title: "😁 Brush Brush Brush Your Teeth", ch: "Dave and Ava" },
+  { id: "M9_gNhxrFpE", title: "🤪 Down by the Bay Part 1", ch: "Dave and Ava" },
+  { id: "eOTRgxr281o", title: "😁 Oscar Song", ch: "Dave and Ava" },
+  { id: "Idfq14FRc1o", title: "🤩 Phonics Song – Part 2", ch: "Dave and Ava" },
+  { id: "5TnsXPrMw8g", title: "😜 Ten in the Bed", ch: "Dave and Ava" },
+  { id: "tPIn4j0X-yE", title: "🤩 Wheels on the Bus", ch: "Dave and Ava" },
+  // — Little Baby Bum —
+  { id: "iswsx8fvM3k", title: "Animal Circus Show! 🎪🐘", ch: "Little Baby Bum" },
+  { id: "4_pXV7zTRWQ", title: "Guess the Vehicle by Shape! 🚒💨", ch: "Little Baby Bum" },
+  { id: "mgYhkhDax3c", title: "Yellow Bus or Orange Bus? 🎵🚌 Wheels On The Bus", ch: "Little Baby Bum" },
+  { id: "jldmxx-1qds", title: "Let's Make Twinkle Star 🎨⭐", ch: "Little Baby Bum" },
+  { id: "f-_NvvFxjjc", title: "Color Wheel With Little Baby Bum! 🚌Color Bus Song", ch: "Little Baby Bum" },
+  { id: "HXjGs4QOkwM", title: "Colorful Sharks 🦈✨", ch: "Little Baby Bum" },
+  // — Cocomelon —
+  { id: "4nsWmFt2bPU", title: "It's Time for Bed, JJ! Goodnight! 😴💤🌙", ch: "Cocomelon" },
+  { id: "lIjx8WqqpxI", title: "Let's Decorate JJ's School Backpack! 🎒 Easy CoComelon Crafts 🎨", ch: "Cocomelon" },
+  { id: "AGZFMMgMIEo", title: "I Love to Go to School! ❤️🚌 Back to School Bus Toy Play", ch: "Cocomelon" },
+  { id: "7NMvvPL76tU", title: "Pat-a-Cake! Sing Along with JJ & Cody 🎂", ch: "Cocomelon" },
+  { id: "gJ_8xQ8a7ME", title: "Let's Stack Healthy Fruit with JJ! 🍎🍉🍊🍍🍌", ch: "Cocomelon" },
+  // — Pinkfong —
+  { id: "Nn3xWy5S9Cs", title: "Happy Shark Month! 🦈 Learn the ABCs with Baby Shark Doo Doo Doo", ch: "Pinkfong" },
+  { id: "GX6vhEixkLc", title: "Move & Groove to the Monkey Banana Song with Melody 🐒", ch: "Pinkfong" },
+  { id: "w8ttk0Msa90", title: "Ready for Your First Concert? 🎵✨", ch: "Pinkfong" },
+  { id: "zgfvooa05wc", title: "⌨️ Let’s Do Sensory Play with a Keyboard", ch: "Pinkfong" },
+  { id: "UZCiGPiLE0I", title: "Where is the Shark Family hiding? 🖐️Sing the Shark Finger Family Song to find them", ch: "Pinkfong" },
+  // — Peppa Pig —
+  { id: "PrHx7D8uW-I", title: "Baby Evie Starts TEETHING! 🦷😩", ch: "Peppa Pig" },
+  { id: "bPL1S56z1As", title: "Peppa's PHONE CALL! 📞", ch: "Peppa Pig" },
+  { id: "NuoOtCSjG5Y", title: "Help George FIND his hearing aid! 🦻", ch: "Peppa Pig" },
+  { id: "H1WDhcOFqHg", title: "Baby Evie's in JAIL! 🚔", ch: "Peppa Pig" },
+  { id: "3IGG3MBsnIA", title: "MYSTERY Button", ch: "Peppa Pig" },
   // — Numberblocks —
-  { id: "8PskYGvr-6w", title: "All About Numberblock 7" },
-  { id: "XtJyNNkY7tk", title: "Cuboid Castle" },
-  { id: "mERgR3H7Xd0", title: "Four Times Tables Speedrun" },
-  { id: "ZbPABTV1nt4", title: "All About Numberblock 6" },
-  { id: "iirtZMhCQes", title: "Three Times Tables Speedrun" },
+  { id: "8PskYGvr-6w", title: "All About Numberblock 7", ch: "Numberblocks" },
+  { id: "XtJyNNkY7tk", title: "Cuboid Castle", ch: "Numberblocks" },
+  { id: "mERgR3H7Xd0", title: "Four Times Tables Speedrun", ch: "Numberblocks" },
+  { id: "ZbPABTV1nt4", title: "All About Numberblock 6", ch: "Numberblocks" },
+  { id: "iirtZMhCQes", title: "Three Times Tables Speedrun", ch: "Numberblocks" },
   // — Sesame Street —
-  { id: "CByrni5-TdI", title: "Dig for Dinosaurs!🦖" },
-  { id: "Acd8FeWcEH8", title: "Monster on the Street" },
-  { id: "sJlyeEGp-TQ", title: "Elmo and Grover Loves the Rain! 🌧️" },
-  { id: "LNhMHPwi5lg", title: "We're a Family" },
-  { id: "s8a3J-YRARc", title: "Knock Knock! Who's There?" },
-  // — ChuChu TV Nursery Rhymes & Kids Songs —
-  { id: "orsLymV0KQg", title: "The Blue Color Song - Part 2" },
-  { id: "d1yjoNMSAg4", title: "Food Alphabet - H for Hot Dog" },
-  { id: "DHf1I6jYYEI", title: "The Blue Color Song - Part 1" },
-  { id: "1MKoPvP3vfI", title: "Food Alphabet - G for Gingerbread Cookies" },
-  // — Bluey - Official Channel —
-  { id: "W18ip2UZj-Y", title: "The Movie at D23! 🎈🍿" },
-  { id: "D7Ru3s51me0", title: "First Look" },
-  // — Super Simple Songs - Kids Songs —
-  { id: "NFP_RP7Jh5c", title: "Happy FIFA World Cup 2026! Celebrating with some HSKT" },
+  { id: "CByrni5-TdI", title: "Dig for Dinosaurs!🦖", ch: "Sesame Street" },
+  { id: "Acd8FeWcEH8", title: "Monster on the Street", ch: "Sesame Street" },
+  { id: "sJlyeEGp-TQ", title: "Elmo and Grover Loves the Rain! 🌧️", ch: "Sesame Street" },
+  { id: "LNhMHPwi5lg", title: "We're a Family", ch: "Sesame Street" },
+  { id: "s8a3J-YRARc", title: "Knock Knock! Who's There?", ch: "Sesame Street" },
+  // — ChuChu TV —
+  { id: "orsLymV0KQg", title: "The Blue Color Song - Part 2", ch: "ChuChu TV" },
+  { id: "d1yjoNMSAg4", title: "Food Alphabet - H for Hot Dog", ch: "ChuChu TV" },
+  { id: "DHf1I6jYYEI", title: "The Blue Color Song - Part 1", ch: "ChuChu TV" },
+  { id: "1MKoPvP3vfI", title: "Food Alphabet - G for Gingerbread Cookies", ch: "ChuChu TV" },
+  // — Bluey —
+  { id: "W18ip2UZj-Y", title: "The Movie at D23! 🎈🍿", ch: "Bluey" },
+  { id: "D7Ru3s51me0", title: "First Look", ch: "Bluey" },
+  // — Super Simple Songs —
+  { id: "NFP_RP7Jh5c", title: "Happy FIFA World Cup 2026! Celebrating with some HSKT", ch: "Super Simple Songs" },
 ];
 
 /* ═══════════════════════════════════════════════════════════════
@@ -518,6 +693,7 @@ const REELS = [
 
 const $ = (id) => document.getElementById(id);
 $('siteName').textContent = SITE_NAME;
+document.title = SITE_NAME;
 if (location.protocol === 'file:') $('warnBanner').classList.remove('hidden');
 
 let toastTimer = null;
@@ -528,40 +704,89 @@ function showToast(msg, ms = 3500) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => t.classList.remove('show'), ms);
 }
-document.title = SITE_NAME.replace(/[^\p{L}\p{N} ]/gu, '').trim() || 'Kiddo TV';
 
-/* ── Build the grids ── */
+/* ── Channel avatars ── */
+const AV_COLORS = ['#e53935','#8e24aa','#3949ab','#039be5','#00897b','#7cb342','#fb8c00','#6d4c41','#d81b60','#00acc1','#5e35b1'];
+const CHANNELS = [...new Set([...VIDEOS, ...REELS].map(v => v.ch).filter(Boolean))];
+function chColor(ch) {
+  const i = CHANNELS.indexOf(ch);
+  return AV_COLORS[(i >= 0 ? i : 0) % AV_COLORS.length];
+}
+
+/* ── Grids + chips + search ── */
+let activeChip = 'All', query = '';
+
+function matches(v) {
+  if (activeChip !== 'All' && v.ch !== activeChip) return false;
+  if (!query) return true;
+  const q = query.toLowerCase();
+  return v.title.toLowerCase().includes(q) || (v.ch || '').toLowerCase().includes(q);
+}
+
 function buildGrid(el, list, mode) {
   el.innerHTML = '';
-  if (!list.length) {
-    el.innerHTML = '<div class="empty">Nothing here yet — ask a grown-up to add some! 🌈</div>';
+  const rows = list.map((v, i) => ({ v, i })).filter(r => matches(r.v));
+  if (!rows.length) {
+    el.innerHTML = '<div class="empty">No videos found 🌈</div>';
     return;
   }
-  list.forEach((v, i) => {
+  rows.forEach(({ v, i }) => {
     const card = document.createElement('button');
     card.className = 'card';
     card.innerHTML =
       '<div class="thumb"><img loading="lazy" alt="" src="https://i.ytimg.com/vi/' + v.id + '/hqdefault.jpg"></div>' +
-      '<h3></h3>';
-    card.querySelector('h3').textContent = v.title;
-    card.addEventListener('click', () => openPlayer(mode, i));
+      '<div class="cinfo">' +
+        (mode === 'videos' ? '<span class="cavatar"></span>' : '') +
+        '<div><div class="ctitle"></div><div class="cch"></div></div>' +
+      '</div>';
+    card.querySelector('.ctitle').textContent = v.title;
+    card.querySelector('.cch').textContent = v.ch || '';
+    const av = card.querySelector('.cavatar');
+    if (av) { av.textContent = (v.ch || '?')[0]; av.style.background = chColor(v.ch); }
+    card.addEventListener('click', () => openPlayer(mode === 'reels' ? 'reels' : 'videos', i));
     el.appendChild(card);
   });
 }
-buildGrid($('videoGrid'), VIDEOS, 'videos');
-buildGrid($('reelGrid'), REELS, 'reels');
 
-/* ── Tabs ── */
-document.querySelectorAll('.tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (!$('watch').classList.contains('hidden')) closePlayer();  // leave the watch page first
-    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === btn));
-    $('videoGrid').classList.toggle('hidden', btn.dataset.mode !== 'videos');
-    $('reelGrid').classList.toggle('hidden', btn.dataset.mode !== 'reels');
+function renderGrids() {
+  buildGrid($('videoGrid'), VIDEOS, 'videos');
+  buildGrid($('reelGrid'), REELS, 'reels');
+}
+
+function buildChips() {
+  const c = $('chips');
+  c.innerHTML = '';
+  ['All', ...CHANNELS].forEach(name => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (name === activeChip ? ' active' : '');
+    b.textContent = name;
+    b.addEventListener('click', () => {
+      activeChip = name;
+      [...c.children].forEach(el => el.classList.toggle('active', el.textContent === name));
+      renderGrids();
+    });
+    c.appendChild(b);
   });
-});
+}
 
-/* ── YouTube IFrame API player ── */
+$('searchInput').addEventListener('input', (e) => { query = e.target.value.trim(); renderGrids(); });
+$('searchBtn').addEventListener('click', () => { query = $('searchInput').value.trim(); renderGrids(); });
+
+buildChips();
+renderGrids();
+
+/* ── Navigation (sidebar + bottom nav) ── */
+function navTo(view) {
+  if (!$('watch').classList.contains('hidden')) closePlayer();
+  document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+  $('videoGrid').classList.toggle('hidden', view !== 'home');
+  $('reelGrid').classList.toggle('hidden', view !== 'shorts');
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('.navbtn').forEach(b => b.addEventListener('click', () => navTo(b.dataset.view)));
+$('logoBtn').addEventListener('click', () => navTo('home'));
+
+/* ── YouTube IFrame API ── */
 let player = null, apiReady = false, playerReady = false;
 let queue = [], qIndex = 0, ticker = null, hideTimer = null, pendingOpen = null;
 let currentMode = 'videos';
@@ -592,13 +817,13 @@ function openPlayer(mode, index) {
   openWatch(index);
 }
 
-/* ── Watch page: YouTube-style layout (player on top, up-next list) ── */
+/* ── Watch page ── */
 function openWatch(index) {
   queue = VIDEOS; qIndex = index; currentMode = 'videos';
   document.body.classList.add('watch-mode');
   $('mainView').classList.add('hidden');
   $('watch').classList.remove('hidden');
-  $('watchTitle').textContent = queue[qIndex].title;
+  syncWatchInfo();
   buildUpNext();
   window.scrollTo(0, 0);
 
@@ -618,6 +843,15 @@ function openWatch(index) {
   }
 }
 
+function syncWatchInfo() {
+  const v = queue[qIndex];
+  $('watchTitle').textContent = v.title;
+  $('wchName').textContent = v.ch || SITE_NAME;
+  $('wchAvatar').textContent = (v.ch || '?')[0];
+  $('wchAvatar').style.background = chColor(v.ch);
+  $('likeBtn').classList.remove('liked');
+}
+
 function buildUpNext() {
   const c = $('upNextList');
   c.innerHTML = '';
@@ -625,8 +859,9 @@ function buildUpNext() {
     const b = document.createElement('button');
     b.className = 'unrow';
     b.innerHTML = '<img loading="lazy" alt="" src="https://i.ytimg.com/vi/' + v.id + '/hqdefault.jpg">' +
-      '<div><div class="t"></div><div class="np">▶ Now playing</div></div>';
+      '<div><div class="t"></div><div class="c"></div><div class="np">▶ Now playing</div></div>';
     b.querySelector('.t').textContent = v.title;
+    b.querySelector('.c').textContent = v.ch || '';
     b.addEventListener('click', () => {
       if (i !== qIndex) { qIndex = i; startCurrent(); window.scrollTo(0, 0); }
     });
@@ -647,7 +882,7 @@ function shortsThumb(img, id) {
 function startCurrent() {
   const v = queue[qIndex];
   $('vtitle').textContent = v.title;
-  $('watchTitle').textContent = v.title;
+  syncWatchInfo();
   updateUpNextHighlight();
   player.loadVideoById(v.id);
   showUi();
@@ -750,6 +985,7 @@ function openShorts(index) {
   $('overlay').classList.add('shorts-mode');
   document.body.style.overflow = 'hidden';
   $('shortsFill').style.width = '0%';
+  $('sLike').classList.remove('liked');
   initShorts(() => {
     applyPos();
     goLive(S.panels[roles[1]], REELS[sIdx].id);
@@ -823,7 +1059,7 @@ function closePlayer() {
   clearInterval(ticker); ticker = null;
 }
 
-/* ── Progress bar ── */
+/* ── Progress ── */
 let seeking = false;
 function fmt(s) {
   s = Math.max(0, Math.floor(s || 0));
@@ -852,14 +1088,14 @@ $('seek').addEventListener('change', () => {
   seeking = false;
 });
 
-/* ── Controls auto-hide ── */
+/* ── Controls auto-hide (watch player) ── */
 function showUi() {
   $('stage').classList.remove('hide-ui');
   scheduleHide();
 }
 function scheduleHide() {
   clearTimeout(hideTimer);
-  if (currentMode === 'reels') return;  // Shorts UI stays visible, like the real app
+  if (currentMode === 'reels') return;
   hideTimer = setTimeout(() => {
     if (playerReady && player.getPlayerState() === YT.PlayerState.PLAYING) {
       $('stage').classList.add('hide-ui');
@@ -882,6 +1118,7 @@ function commitSwipe(dir) {  // 1 = next (swipe up), -1 = previous (swipe down)
   outPan.mode = 'off'; outPan.p.mute(); outPan.p.pauseVideo();
   sIdx = at(sIdx + dir);
   $('shortsFill').style.width = '0%';
+  $('sLike').classList.remove('liked');
   goLive(inPan, REELS[sIdx].id);          // preloaded neighbor: starts instantly
   track.classList.add('anim');
   track.style.transform = 'translateY(' + (dir === 1 ? '-100%' : '100%') + ')';
@@ -943,7 +1180,7 @@ document.addEventListener('keydown', (e) => {
 
 /* ── Wire up buttons ── */
 $('shield').addEventListener('click', () => {
-  if (suppressClick) return;  // this tap was a swipe, not a tap
+  if (suppressClick) return;
   if ($('stage').classList.contains('hide-ui')) showUi();
   else togglePlay();
 });
@@ -952,6 +1189,7 @@ $('playBtn').addEventListener('click', togglePlay);
 $('nextBtn').addEventListener('click', next);
 $('prevBtn').addEventListener('click', prev);
 $('backBtn').addEventListener('click', closePlayer);
+$('likeBtn').addEventListener('click', () => $('likeBtn').classList.toggle('liked'));
 
 /* Fullscreen: native API on the stage (controls + shield stay overlaid), CSS fallback elsewhere */
 const stageEl = $('stage');
@@ -978,7 +1216,7 @@ $('fsBtn').addEventListener('click', () => {
 document.addEventListener('fullscreenchange', updateFsIcon);
 document.addEventListener('webkitfullscreenchange', updateFsIcon);
 
-/* Shorts chrome: silent tap-to-pause on the shield, back arrow to exit */
+/* Shorts chrome: silent tap-to-pause, back arrow, decorative rail (Like toggles) */
 $('sShield').addEventListener('click', () => {
   if (suppressClick || !S.inited) return;
   const pan = S.panels[roles[1]];
@@ -987,6 +1225,7 @@ $('sShield').addEventListener('click', () => {
   else pan.p.playVideo();
 });
 $('sBack').addEventListener('click', closePlayer);
+$('sLike').addEventListener('click', () => $('sLike').classList.toggle('liked'));
 </script>
 </body>
 </html>
