@@ -351,6 +351,17 @@
   .shorts-mode #shortsUI { display: block; }
   #sShield { position: absolute; inset: 0; z-index: 2; touch-action: none; }
   #sBack { position: absolute; top: 14px; left: 14px; z-index: 3; }
+  /* Our own Shorts-style pause indicator: opaque enough to fully mask
+     YouTube's centered play button inside the iframe */
+  #sPause {
+    position: absolute; inset: 0; margin: auto; z-index: 3;
+    width: 96px; height: 96px; border-radius: 50%;
+    border: none; cursor: pointer;
+    background: rgba(18, 18, 18, .92);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    display: grid; place-items: center;
+  }
+  #sPause svg { width: 44px; height: 44px; fill: #fff; }
   #srail {
     position: absolute; z-index: 3;
     right: calc(50% - min(50vw, 28.125vh) + 8px);
@@ -534,6 +545,7 @@
   <div id="shortsUI">
     <div id="sShield"></div>
     <button class="cbtn" id="sBack" aria-label="Back">←</button>
+    <button id="sPause" class="hidden" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
     <div id="srail">
       <button class="railbtn" id="sLike" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg></button>
       <button class="railbtn" aria-label="Dislike"><svg viewBox="0 0 24 24"><path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/></svg></button>
@@ -959,7 +971,9 @@ function preload(pan, id) {
 function onSState(pan, e) {
   if (e.data === YT.PlayerState.PLAYING) {
     if (pan.mode === 'preload') { pan.p.pauseVideo(); pan.p.seekTo(0, true); pan.ready = true; }
-    else if (pan.mode === 'live') { errStreak = 0; hidePoster(pan); }
+    else if (pan.mode === 'live') { errStreak = 0; hidePoster(pan); $('sPause').classList.add('hidden'); }
+  } else if (e.data === YT.PlayerState.PAUSED && pan.mode === 'live' && currentMode === 'reels') {
+    $('sPause').classList.remove('hidden');     // masks YouTube's own play button
   } else if (e.data === YT.PlayerState.ENDED && pan.mode === 'live') {
     pan.p.seekTo(0, true); pan.p.playVideo();   // Shorts loop
   }
@@ -986,6 +1000,7 @@ function openShorts(index) {
   document.body.style.overflow = 'hidden';
   $('shortsFill').style.width = '0%';
   $('sLike').classList.remove('liked');
+  $('sPause').classList.add('hidden');
   initShorts(() => {
     applyPos();
     goLive(S.panels[roles[1]], REELS[sIdx].id);
@@ -1119,6 +1134,7 @@ function commitSwipe(dir) {  // 1 = next (swipe up), -1 = previous (swipe down)
   sIdx = at(sIdx + dir);
   $('shortsFill').style.width = '0%';
   $('sLike').classList.remove('liked');
+  $('sPause').classList.add('hidden');
   goLive(inPan, REELS[sIdx].id);          // preloaded neighbor: starts instantly
   track.classList.add('anim');
   track.style.transform = 'translateY(' + (dir === 1 ? '-100%' : '100%') + ')';
@@ -1216,14 +1232,22 @@ $('fsBtn').addEventListener('click', () => {
 document.addEventListener('fullscreenchange', updateFsIcon);
 document.addEventListener('webkitfullscreenchange', updateFsIcon);
 
-/* Shorts chrome: tap never pauses (a paused embed shows YouTube's own play
-   button inside the iframe, which we can't hide) — tap only starts playback
-   when it isn't running, e.g. after a blocked autoplay */
+/* Shorts chrome: tap toggles pause like the real Shorts app. Our #sPause
+   indicator appears instantly and sits over YouTube's in-iframe play button */
 $('sShield').addEventListener('click', () => {
   if (suppressClick || !S.inited) return;
   const pan = S.panels[roles[1]];
   if (!pan || pan.mode !== 'live') return;
-  if (pan.p.getPlayerState() !== YT.PlayerState.PLAYING) pan.p.playVideo();
+  if (pan.p.getPlayerState() === YT.PlayerState.PLAYING) {
+    $('sPause').classList.remove('hidden');   // show before the pause lands: no flash of YouTube's button
+    pan.p.pauseVideo();
+  } else {
+    pan.p.playVideo();
+  }
+});
+$('sPause').addEventListener('click', () => {
+  const pan = S.panels[roles[1]];
+  if (pan && pan.mode === 'live') pan.p.playVideo();
 });
 $('sBack').addEventListener('click', closePlayer);
 $('sLike').addEventListener('click', () => $('sLike').classList.toggle('liked'));
