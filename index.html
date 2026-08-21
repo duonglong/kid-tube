@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Kiddo TV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Fredoka', 'Comic Sans MS', system-ui, sans-serif;
+    background: linear-gradient(160deg, #fef6e4 0%, #e8f4ff 100%);
+    min-height: 100vh;
+    color: #2b2b45;
+  }
+
+  /* ── Header ─────────────────────────────── */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 20px;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(80, 80, 140, .12);
+  }
+  .logo {
+    font-size: 26px; font-weight: 700;
+    background: linear-gradient(90deg, #ff5d8f, #ff9e2c, #38c976);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    user-select: none;
+  }
+  nav { display: flex; gap: 10px; margin-left: auto; }
+  .tab {
+    border: none; cursor: pointer;
+    font-family: inherit; font-size: 17px; font-weight: 600;
+    padding: 10px 22px; border-radius: 999px;
+    background: #f0f0fa; color: #6b6b8f;
+    transition: all .15s;
+  }
+  .tab.active { background: #ff5d8f; color: #fff; box-shadow: 0 4px 12px rgba(255, 93, 143, .4); }
+
+  /* ── Grids ──────────────────────────────── */
+  main { padding: 24px; max-width: 1200px; margin: 0 auto; }
+  .grid {
+    display: grid; gap: 22px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  }
+  .grid.reels { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+
+  .card {
+    background: #fff; border-radius: 18px; overflow: hidden;
+    cursor: pointer; border: none; padding: 0; text-align: left;
+    font-family: inherit;
+    box-shadow: 0 4px 14px rgba(80, 80, 140, .12);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .card:hover, .card:focus-visible { transform: translateY(-4px) scale(1.02); box-shadow: 0 10px 24px rgba(80, 80, 140, .2); }
+  .card:active { transform: scale(.97); }
+
+  .thumb { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #dcdcf0; }
+  .reels .thumb { aspect-ratio: 9 / 14; }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb::after {
+    content: '▶'; position: absolute; inset: 0;
+    display: grid; place-items: center;
+    font-size: 34px; color: #fff;
+    text-shadow: 0 2px 10px rgba(0,0,0,.5);
+    opacity: 0; transition: opacity .15s;
+    background: rgba(0,0,0,.18);
+  }
+  .card:hover .thumb::after { opacity: 1; }
+  .card h3 {
+    padding: 12px 14px 14px;
+    font-size: 15.5px; font-weight: 600; line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .empty { grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: #9a9ab8; font-size: 18px; }
+  .hidden { display: none !important; }
+
+  /* ── Watch page (YouTube-style layout for regular videos) ── */
+  #watch { max-width: 1280px; margin: 0 auto; padding: 20px 24px; }
+  .watch-layout {
+    display: grid; grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 24px; align-items: start;
+  }
+  #watchTitle { font-size: 19px; font-weight: 600; line-height: 1.4; margin: 14px 4px 0; }
+  .watch-main #vtitle { display: none; }   /* title lives below the player, like YouTube */
+  .upnext h2 { font-size: 16px; font-weight: 700; margin: 0 0 10px; }
+  .unrow {
+    display: flex; gap: 10px; width: 100%;
+    padding: 6px; border: none; border-radius: 12px;
+    background: transparent; cursor: pointer;
+    font-family: inherit; text-align: left;
+  }
+  .unrow:hover { background: #fff; box-shadow: 0 2px 10px rgba(80,80,140,.12); }
+  .unrow img {
+    width: 150px; aspect-ratio: 16 / 9; object-fit: cover;
+    border-radius: 10px; flex-shrink: 0; background: #dcdcf0;
+  }
+  .unrow .t {
+    font-size: 14px; font-weight: 600; line-height: 1.35; color: #2b2b45;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .unrow .np { display: none; font-size: 12.5px; font-weight: 700; color: #ff5d8f; margin-top: 4px; }
+  .unrow.playing { background: #ffe3ec; }
+  .unrow.playing .np { display: block; }
+
+  @media (max-width: 900px) {
+    #watch { padding: 0; }
+    .watch-layout { grid-template-columns: 1fr; gap: 0; }
+    .stage { border-radius: 0; position: sticky; top: 0; z-index: 50; }
+    #watchTitle { margin: 12px 16px 4px; font-size: 17px; }
+    .upnext { padding: 12px 10px; }
+    .upnext h2 { margin: 8px 6px; }
+    body.watch-mode header { display: none; }   /* like the YouTube app: player at the very top */
+  }
+
+  /* ── Player overlay ─────────────────────── */
+  #overlay {
+    position: fixed; inset: 0; z-index: 100;
+    background: #0d0d1a; overflow: hidden;
+    touch-action: none; overscroll-behavior: contain;
+  }
+  #track {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    will-change: transform;
+  }
+  #track.anim { transition: transform .28s cubic-bezier(.2, .7, .3, 1); }
+
+  /* Shorts panels: three stacked players (prev / current / next), preloaded */
+  .spanel {
+    position: absolute; left: 0; width: 100%; height: 100%;
+    display: none; align-items: center; justify-content: center;
+  }
+  .shorts-mode .spanel { display: flex; }
+  .spanel.pos-prev { top: -100%; }
+  .spanel.pos-cur { top: 0; }
+  .spanel.pos-next { top: 100%; }
+  .sbox {
+    position: relative; overflow: hidden;
+    width: min(100vw, 56.25vh); aspect-ratio: 9 / 16;
+    background: #16162a;
+  }
+  .sbox iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #000;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .stage iframe { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+  /* The shield: catches every tap so nothing inside the iframe is clickable */
+  #shield { position: absolute; inset: 0; z-index: 2; touch-action: none; }
+
+  /* Poster: covers a panel until its video is actually playing */
+  .sposter { position: absolute; inset: 0; z-index: 1; background: #16162a; }
+  .sposter img { width: 100%; height: 100%; object-fit: cover; }
+  .sposter .spinner {
+    position: absolute; inset: 0; margin: auto;
+    width: 46px; height: 46px; border-radius: 50%;
+    border: 4px solid rgba(255,255,255,.25); border-top-color: #ff5d8f;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Shorts-mode chrome: tap shield + back button + thin progress bar, fixed over the sliding panels */
+  #shortsUI { display: none; }
+  .shorts-mode #shortsUI { display: block; }
+  #sShield { position: absolute; inset: 0; z-index: 2; touch-action: none; }
+  #sBack { position: absolute; top: 14px; left: 14px; z-index: 3; }
+  #shortsBar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 3px; z-index: 3;
+    background: rgba(255,255,255,.2);
+  }
+  #shortsFill { height: 100%; width: 0%; background: #ff5d8f; }
+
+  .bar {
+    position: absolute; left: 0; right: 0; z-index: 3;
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 18px;
+    transition: opacity .25s;
+  }
+  #topbar { top: 0; background: linear-gradient(rgba(0,0,0,.65), transparent); }
+  #botbar { bottom: 0; background: linear-gradient(transparent, rgba(0,0,0,.75)); }
+  .stage.hide-ui .bar { opacity: 0; pointer-events: none; }
+
+  #vtitle { color: #fff; font-size: 17px; font-weight: 600; flex: 1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .cbtn {
+    border: none; cursor: pointer; flex-shrink: 0;
+    width: 52px; height: 52px; border-radius: 50%;
+    font-size: 22px; color: #fff;
+    background: rgba(255,255,255,.18);
+    display: grid; place-items: center;
+    transition: background .15s, transform .1s;
+  }
+  .cbtn:hover { background: rgba(255,255,255,.32); }
+  .cbtn:active { transform: scale(.92); }
+
+  /* YouTube-style control bar: thin red seek bar above a row of flat white icons */
+  #botbar {
+    flex-direction: column; align-items: stretch; gap: 0;
+    padding: 0 10px 2px;
+    background: linear-gradient(transparent, rgba(0,0,0,.8));
+  }
+  #seek {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 3px; margin: 10px 0 2px;
+    border-radius: 0; cursor: pointer;
+    background: rgba(255,255,255,.3);
+    accent-color: #f00;
+  }
+  #seek:hover { height: 5px; }
+  #seek::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px; height: 13px; border-radius: 50%;
+    background: #f00; border: none;
+    opacity: 0; transition: opacity .1s;
+  }
+  #botbar:hover #seek::-webkit-slider-thumb, #seek:active::-webkit-slider-thumb { opacity: 1; }
+  #ybtns { display: flex; align-items: center; gap: 2px; }
+  .ybtn {
+    border: none; background: transparent; cursor: pointer;
+    width: 46px; height: 42px; padding: 0;
+    display: grid; place-items: center;
+    opacity: .9; transition: opacity .1s;
+  }
+  .ybtn:hover { opacity: 1; }
+  .ybtn svg { width: 24px; height: 24px; fill: #fff; }
+  #playBtn svg { width: 34px; height: 34px; }
+  #playBtn .ico-play { display: none; }
+  #playBtn.is-paused .ico-play { display: block; }
+  #playBtn.is-paused .ico-pause { display: none; }
+  #timeLbl {
+    color: #fff; font-size: 13px; font-weight: 400;
+    margin-left: 8px; font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 2px rgba(0,0,0,.5);
+  }
+
+  /* Big center play button (shown when paused), styled like YouTube's */
+  #bigPlay {
+    position: absolute; inset: 0; z-index: 2; margin: auto;
+    width: 68px; height: 48px; border-radius: 12px;
+    border: none; cursor: pointer;
+    background: rgba(33, 33, 33, .85);
+    display: grid; place-items: center;
+    transition: background .1s;
+  }
+  #bigPlay:hover { background: #f00; }
+  #bigPlay svg { width: 30px; height: 30px; fill: #fff; }
+
+  /* ── Toast & warning banner ─────────────── */
+  #toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+    z-index: 200; max-width: min(90vw, 480px);
+    background: #2b2b45; color: #fff;
+    font-size: 15px; font-weight: 500; line-height: 1.4;
+    padding: 12px 20px; border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+    opacity: 0; pointer-events: none; transition: opacity .25s;
+  }
+  #toast.show { opacity: 1; }
+  #warnBanner {
+    background: #fff3cd; color: #7a5c00;
+    border-bottom: 2px solid #ffe08a;
+    padding: 12px 20px; font-size: 15px; line-height: 1.5;
+  }
+  #warnBanner code { background: #ffe9a8; padding: 2px 6px; border-radius: 6px; font-size: 13.5px; }
+
+  @media (max-width: 600px) {
+    main { padding: 16px; }
+    .grid { gap: 14px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .grid.reels { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
+    .logo { font-size: 21px; }
+    .tab { font-size: 15px; padding: 8px 16px; }
+    .cbtn { width: 44px; height: 44px; font-size: 18px; }
+    .ybtn { width: 42px; height: 38px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="warnBanner" class="hidden">
+  ⚠️ <strong>This page was opened as a file</strong>, so YouTube refuses to play videos
+  (error 153 — it can't verify which website is embedding them).
+  Serve it over HTTP instead: run <code>python3 -m http.server 8080</code> in this folder,
+  then open <code>http://localhost:8080</code>.
+</div>
+
+<header>
+  <span class="logo" id="siteName"></span>
+  <nav>
+    <button class="tab active" data-mode="videos">📺 Videos</button>
+    <button class="tab" data-mode="reels">🎬 Shorts</button>
+  </nav>
+</header>
+
+<main id="mainView">
+  <div id="videoGrid" class="grid"></div>
+  <div id="reelGrid" class="grid reels hidden"></div>
+</main>
+
+<div id="watch" class="hidden">
+  <div class="watch-layout">
+    <div class="watch-main">
+      <div class="stage" id="stage">
+        <div id="yt"></div>
+        <div id="shield"></div>
+        <button id="bigPlay" class="hidden" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
+        <div class="bar" id="topbar">
+          <button class="cbtn" id="backBtn" aria-label="Back">←</button>
+          <span id="vtitle"></span>
+        </div>
+        <div class="bar" id="botbar">
+          <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
+          <div id="ybtns">
+            <button class="ybtn" id="prevBtn" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></button>
+            <button class="ybtn" id="playBtn" aria-label="Play/Pause">
+              <svg class="ico-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              <svg class="ico-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <button class="ybtn" id="nextBtn" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></button>
+            <span id="timeLbl">0:00 / 0:00</span>
+          </div>
+        </div>
+      </div>
+      <h1 id="watchTitle"></h1>
+    </div>
+    <aside class="upnext">
+      <h2>Up next</h2>
+      <div id="upNextList"></div>
+    </aside>
+  </div>
+</div>
+
+<div id="overlay" class="hidden">
+  <div id="track">
+    <div class="spanel pos-prev" id="spA"><div class="sbox"><div id="shA"></div><div class="sposter hidden"><img alt=""><div class="spinner"></div></div></div></div>
+    <div class="spanel pos-cur" id="spB"><div class="sbox"><div id="shB"></div><div class="sposter hidden"><img alt=""><div class="spinner"></div></div></div></div>
+    <div class="spanel pos-next" id="spC"><div class="sbox"><div id="shC"></div><div class="sposter hidden"><img alt=""><div class="spinner"></div></div></div></div>
+  </div>
+  <div id="shortsUI">
+    <div id="sShield"></div>
+    <button class="cbtn" id="sBack" aria-label="Back">←</button>
+    <div id="shortsBar"><div id="shortsFill"></div></div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   PARENT ZONE — this is the only part you ever need to edit.
+
+   To add a video: copy its YouTube URL, take the ID (the part
+   after "watch?v=" or "youtu.be/" or "/shorts/"), and add a line:
+       { id: "VIDEO_ID", title: "Name your child will see" },
+
+   The samples below are placeholders — replace them with your list.
+   ═══════════════════════════════════════════════════════════════ */
+
+const SITE_NAME = "★ Kiddo TV";
+
+const AUTOPLAY_NEXT = true;   // when a video ends, play the next one in the list
+
+const VIDEOS = [
+  // — Super Simple Songs - Kids Songs —
+  { id: "LLgTFZP3IQQ", title: "Top 20 Back To School Songs" },
+  { id: "YaFSwBg1qvg", title: "Put on Your Shoes" },
+  { id: "BG8HLIvuK24", title: "Top 20 Counting Songs" },
+  { id: "-HOQGg7uuQQ", title: "Counting Up To 20" },
+  { id: "jZnBNf0GJyU", title: "Top 20 Book Songs 📚" },
+  // — Bluey - Official Channel —
+  { id: "iPnLwR26BvI", title: "Keepy Uppy 🎈" },
+  { id: "fnoFXhmy4-c", title: "🔴 LIVE: Bandit won't stop teasing!😂💙" },
+  { id: "i6yHNspt_GI", title: "🔴 LIVE: Pom Pom plays Pass the Parcel! 💙🎁" },
+  { id: "jzUR0G9aJyg", title: "🔴LIVE: Bluey and her Friends play Circus!💙🎪" },
+  { id: "UtxqHTxzQbU", title: "Bluey Makes Pizzas for Mum and Dad 🍕 ☺️" },
+  // — ChuChu TV Nursery Rhymes & Kids Songs —
+  { id: "jgYSNnDEVuA", title: "Letter A to H Songs" },
+  { id: "WE7XxoY74KY", title: "The Great Bubble Chase! Playtime Fun" },
+  { id: "7cIKO4ZuXHw", title: "How to Draw Savanna Animals for Kids" },
+  { id: "QTa-tX3UaJs", title: "Dinosaur Songs for Kids" },
+  { id: "wQHEOVv9ZfI", title: "Bestie and Friends - Pickleball Pranks! 🏓" },
+  // — Peppa Pig - Official Channel —
+  { id: "L5CCBmHyrMM", title: "Peppa Pig 2026 NEWEST Episodes 🐷 Best of Season 10 & 11! 🤩 Summer Adventures 🗺️" },
+  { id: "3MQVTqA_feI", title: "🔴 LIVE: Cutest Baby Evie Episode 🍼 Peppa Pig Best Big Sister Moments✨Kids Cartoons 🐷 FULL Episodes" },
+  { id: "MrbSRl_7-ME", title: "Ice Hockey RIVALRY At Penny Polar Bear's Party! 🎂🏒🔥 Peppa Pig Full Episodes" },
+  { id: "xzxV9-3Vvf0", title: "Peppa RESCUES Baby Duck on Bike Ride! 🐥🚲 Peppa Pig Tales Episodes" },
+  { id: "vzkQB1Jc7mo", title: "🥠 Peppa Goes to YUMMY Chinese BUFFET 🥢 ALL You Can EAT! 😱 BRAND NEW Peppa Pig Tales Episodes" },
+  // — Numberblocks —
+  { id: "ucLv2D0o3eQ", title: "I Can't Sleep! - Counting Sheep" },
+  { id: "Vz9kT3Ntbw0", title: "Thank You for 15 Million Subscribers!!! 🥳🎉" },
+  { id: "_pjA7_SY21E", title: "Land of the Giants! - Big Numbers for Big kids" },
+  { id: "bWSI5S2LYmk", title: "Whose House is this? - Numberblocks Homes" },
+  { id: "05cqSSwJEgE", title: "Let's Make Rainbow Slime" },
+  // — Sesame Street —
+  { id: "mIXu9K24g30", title: "Go for the Gold 🌟 🌟 🌟 (Golden Parody)" },
+  { id: "d5lKPl5qCkk", title: "Fun with STEM 🔭 🧮 Building and Counting with Elmo" },
+  { id: "yaD0n5awR_E", title: "Dinosaur Time with Elmo! 🦖 🦕" },
+  { id: "Sabpxv77cfY", title: "A Day at School with Elmo, Abby, & Cookie Monster! 🎒 🚌 📝" },
+  { id: "Q934OTUJ-y0", title: "Sesame Street Full Episodes!🔴Learn ABCs, 123s, Nursery Rhymes, & MORE" },
+  // — Baby Shark - Pinkfong Kids’ Songs & Stories —
+  { id: "3tGwOyLPyrU", title: "[🚨NEW] Eeh Ooh! Catch the Thieves" },
+  { id: "5aO1MzkRRaA", title: "[BEST 26] Kids’ Favorite Baby Shark Dance Songs" },
+  { id: "gsN0DaxECdU", title: "Where Is Baby Shark’s Tail?" },
+  { id: "CUPJEtxN6iU", title: "🎵My First Concert Live! l Pinkfong & Baby Shark" },
+  // — Little Baby Bum - Nursery Rhymes & Kids Songs —
+  { id: "BFIOE2jKZbA", title: "Max and Twinkle’s Magic Shape Safari! 🪄✨ LBB New Look VS Classic Look" },
+  { id: "m02ZlHGaepU", title: "Mia’s Perfect Picnic Day! 🧺" },
+  { id: "4Z12ihnmYTI", title: "We Visit the Dino Museum! 🦖🏛️ Wheels On the Bus" },
+  { id: "OIyBrKTy0OY", title: "Twinkle & Monkey Bathtime🛁👶 LBB New Look VS Classic Look" },
+  // — Cocomelon - Nursery Rhymes —
+  { id: "_cmxOYRWYQA", title: "Freeze Dance Challenge" },
+  { id: "vFdBQ64gZf4", title: "Humpty Dumpty at School with JJ's Friends" },
+  { id: "O0nV7hJ9qzk", title: "Potty Training Song" },
+  { id: "Gfcybr0q-HA", title: "Bus Wash Song and Wheels on the Animal Bus" },
+  // — Dave and Ava - Nursery Rhymes and Baby Songs —
+  { id: "hrEJ9Q9AA4A", title: "​​😻 Opposites for Kids and Nursery Rhymes" },
+  { id: "_6R8Q-NPkIM", title: "🤩 Three Little Kittens" },
+  { id: "1CirznQKdDg", title: "😁 Nursery Rhymes and Kids Songs" },
+  { id: "XlpE3Gw_HIQ", title: "​​😁 Opposites for Kids and Nursery Rhymes" },
+  // — Blippi - Educational Videos for Kids —
+  { id: "mXnKExSeaUw", title: "Blippi's Super Silly Vehicle Race! 🏎️" },
+  { id: "cn4cxq6m7sU", title: "Blippi's Best Space Aventures! 🚀 Top 5 Special" },
+  { id: "Q35dLHdxhDc", title: "PAW Patrol & Blippi's Rescue Mission on Dino Island! 🦖" },
+  { id: "2T2ufNy9Lw0", title: "Blippi’s Back to School Special! 🏫" },
+];
+
+const REELS = [
+  // — Blippi - Educational Videos for Kids —
+  { id: "dtYXraDuZ6U", title: "Bada Bing Bada BOOM! 💥 Blippi Builds a Blue Train! 🚂" },
+  { id: "g_jO2V8ZPmE", title: "Sink or Float ⚖️💧 Let's Test Trains, Planes, Cars and Boats" },
+  { id: "M-9yUuzFf00", title: "What Vehicle Carries the MOST Candy? 🍬 Toy Vehicle Challenge" },
+  { id: "a_v0YX0Nqjo", title: "Can You GUESS the Sand Vehicles? 🚗🏖️ Summer Vehicle Challenge" },
+  { id: "y9YvWyH5eWg", title: "Blippi Builds a FRUIT Monster Truck! 🍓🛻" },
+  { id: "L91B_OiWgQA", title: "Blippi Meets a Kid with his OWN AIRPLANE? ✈️ Big Vehicles, Bigger Questions" },
+  // — Dave and Ava - Nursery Rhymes and Baby Songs —
+  { id: "wy-NNbVqfRw", title: "😁 Brush Brush Brush Your Teeth" },
+  { id: "M9_gNhxrFpE", title: "🤪 Down by the Bay Part 1" },
+  { id: "eOTRgxr281o", title: "😁 Oscar Song" },
+  { id: "Idfq14FRc1o", title: "🤩 Phonics Song – Part 2" },
+  { id: "5TnsXPrMw8g", title: "😜 Ten in the Bed" },
+  { id: "tPIn4j0X-yE", title: "🤩 Wheels on the Bus" },
+  // — Little Baby Bum - Nursery Rhymes & Kids Songs —
+  { id: "iswsx8fvM3k", title: "Animal Circus Show! 🎪🐘" },
+  { id: "4_pXV7zTRWQ", title: "Guess the Vehicle by Shape! 🚒💨" },
+  { id: "mgYhkhDax3c", title: "Yellow Bus or Orange Bus? 🎵🚌 Wheels On The Bus" },
+  { id: "jldmxx-1qds", title: "Let's Make Twinkle Star 🎨⭐" },
+  { id: "f-_NvvFxjjc", title: "Color Wheel With Little Baby Bum! 🚌Color Bus Song" },
+  { id: "HXjGs4QOkwM", title: "Colorful Sharks 🦈✨" },
+  // — Cocomelon - Nursery Rhymes —
+  { id: "4nsWmFt2bPU", title: "It's Time for Bed, JJ! Goodnight! 😴💤🌙" },
+  { id: "lIjx8WqqpxI", title: "Let's Decorate JJ's School Backpack! 🎒 Easy CoComelon Crafts 🎨" },
+  { id: "AGZFMMgMIEo", title: "I Love to Go to School! ❤️🚌 Back to School Bus Toy Play" },
+  { id: "7NMvvPL76tU", title: "Pat-a-Cake! Sing Along with JJ & Cody 🎂" },
+  { id: "gJ_8xQ8a7ME", title: "Let's Stack Healthy Fruit with JJ! 🍎🍉🍊🍍🍌" },
+  // — Baby Shark - Pinkfong Kids’ Songs & Stories —
+  { id: "Nn3xWy5S9Cs", title: "Happy Shark Month! 🦈 Learn the ABCs with Baby Shark Doo Doo Doo" },
+  { id: "GX6vhEixkLc", title: "Move & Groove to the Monkey Banana Song with Melody 🐒" },
+  { id: "w8ttk0Msa90", title: "Ready for Your First Concert? 🎵✨" },
+  { id: "zgfvooa05wc", title: "⌨️ Let’s Do Sensory Play with a Keyboard" },
+  { id: "UZCiGPiLE0I", title: "Where is the Shark Family hiding? 🖐️Sing the Shark Finger Family Song to find them" },
+  // — Peppa Pig - Official Channel —
+  { id: "PrHx7D8uW-I", title: "Baby Evie Starts TEETHING! 🦷😩" },
+  { id: "bPL1S56z1As", title: "Peppa's PHONE CALL! 📞" },
+  { id: "NuoOtCSjG5Y", title: "Help George FIND his hearing aid! 🦻" },
+  { id: "H1WDhcOFqHg", title: "Baby Evie's in JAIL! 🚔" },
+  { id: "3IGG3MBsnIA", title: "MYSTERY Button" },
+  // — Numberblocks —
+  { id: "8PskYGvr-6w", title: "All About Numberblock 7" },
+  { id: "XtJyNNkY7tk", title: "Cuboid Castle" },
+  { id: "mERgR3H7Xd0", title: "Four Times Tables Speedrun" },
+  { id: "ZbPABTV1nt4", title: "All About Numberblock 6" },
+  { id: "iirtZMhCQes", title: "Three Times Tables Speedrun" },
+  // — Sesame Street —
+  { id: "CByrni5-TdI", title: "Dig for Dinosaurs!🦖" },
+  { id: "Acd8FeWcEH8", title: "Monster on the Street" },
+  { id: "sJlyeEGp-TQ", title: "Elmo and Grover Loves the Rain! 🌧️" },
+  { id: "LNhMHPwi5lg", title: "We're a Family" },
+  { id: "s8a3J-YRARc", title: "Knock Knock! Who's There?" },
+  // — ChuChu TV Nursery Rhymes & Kids Songs —
+  { id: "orsLymV0KQg", title: "The Blue Color Song - Part 2" },
+  { id: "d1yjoNMSAg4", title: "Food Alphabet - H for Hot Dog" },
+  { id: "DHf1I6jYYEI", title: "The Blue Color Song - Part 1" },
+  { id: "1MKoPvP3vfI", title: "Food Alphabet - G for Gingerbread Cookies" },
+  // — Bluey - Official Channel —
+  { id: "W18ip2UZj-Y", title: "The Movie at D23! 🎈🍿" },
+  { id: "D7Ru3s51me0", title: "First Look" },
+  // — Super Simple Songs - Kids Songs —
+  { id: "NFP_RP7Jh5c", title: "Happy FIFA World Cup 2026! Celebrating with some HSKT" },
+];
+
+/* ═══════════════════════════════════════════════════════════════
+   Everything below is the app — no need to touch it.
+   ═══════════════════════════════════════════════════════════════ */
+
+const $ = (id) => document.getElementById(id);
+$('siteName').textContent = SITE_NAME;
+if (location.protocol === 'file:') $('warnBanner').classList.remove('hidden');
+
+let toastTimer = null;
+function showToast(msg, ms = 3500) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), ms);
+}
+document.title = SITE_NAME.replace(/[^\p{L}\p{N} ]/gu, '').trim() || 'Kiddo TV';
+
+/* ── Build the grids ── */
+function buildGrid(el, list, mode) {
+  el.innerHTML = '';
+  if (!list.length) {
+    el.innerHTML = '<div class="empty">Nothing here yet — ask a grown-up to add some! 🌈</div>';
+    return;
+  }
+  list.forEach((v, i) => {
+    const card = document.createElement('button');
+    card.className = 'card';
+    card.innerHTML =
+      '<div class="thumb"><img loading="lazy" alt="" src="https://i.ytimg.com/vi/' + v.id + '/hqdefault.jpg"></div>' +
+      '<h3></h3>';
+    card.querySelector('h3').textContent = v.title;
+    card.addEventListener('click', () => openPlayer(mode, i));
+    el.appendChild(card);
+  });
+}
+buildGrid($('videoGrid'), VIDEOS, 'videos');
+buildGrid($('reelGrid'), REELS, 'reels');
+
+/* ── Tabs ── */
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (!$('watch').classList.contains('hidden')) closePlayer();  // leave the watch page first
+    document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b === btn));
+    $('videoGrid').classList.toggle('hidden', btn.dataset.mode !== 'videos');
+    $('reelGrid').classList.toggle('hidden', btn.dataset.mode !== 'reels');
+  });
+});
+
+/* ── YouTube IFrame API player ── */
+let player = null, apiReady = false, playerReady = false;
+let queue = [], qIndex = 0, ticker = null, hideTimer = null, pendingOpen = null;
+let currentMode = 'videos';
+
+const tag = document.createElement('script');
+tag.src = 'https://www.youtube.com/iframe_api';
+document.head.appendChild(tag);
+
+function onYouTubeIframeAPIReady() {
+  apiReady = true;
+  if (pendingOpen) { const p = pendingOpen; pendingOpen = null; openPlayer(p.mode, p.index); }
+}
+
+// Error 153 fix: YouTube requires knowing the embedding site's origin
+function baseVars(autoplay) {
+  return {
+    autoplay: autoplay ? 1 : 0, rel: 0, playsinline: 1,
+    controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3,
+    ...(location.protocol.startsWith('http')
+      ? { origin: location.origin, widget_referrer: location.href }
+      : {}),
+  };
+}
+
+function openPlayer(mode, index) {
+  if (!apiReady) { pendingOpen = { mode, index }; return; }
+  if (mode === 'reels') { openShorts(index); return; }
+  openWatch(index);
+}
+
+/* ── Watch page: YouTube-style layout (player on top, up-next list) ── */
+function openWatch(index) {
+  queue = VIDEOS; qIndex = index; currentMode = 'videos';
+  document.body.classList.add('watch-mode');
+  $('mainView').classList.add('hidden');
+  $('watch').classList.remove('hidden');
+  $('watchTitle').textContent = queue[qIndex].title;
+  buildUpNext();
+  window.scrollTo(0, 0);
+
+  if (!player) {
+    player = new YT.Player('yt', {
+      host: 'https://www.youtube-nocookie.com',
+      videoId: queue[qIndex].id,
+      playerVars: baseVars(true),
+      events: {
+        onReady: () => { playerReady = true; startCurrent(); },
+        onStateChange: onState,
+        onError: onPlayerError,
+      },
+    });
+  } else if (playerReady) {
+    startCurrent();
+  }
+}
+
+function buildUpNext() {
+  const c = $('upNextList');
+  c.innerHTML = '';
+  VIDEOS.forEach((v, i) => {
+    const b = document.createElement('button');
+    b.className = 'unrow';
+    b.innerHTML = '<img loading="lazy" alt="" src="https://i.ytimg.com/vi/' + v.id + '/hqdefault.jpg">' +
+      '<div><div class="t"></div><div class="np">▶ Now playing</div></div>';
+    b.querySelector('.t').textContent = v.title;
+    b.addEventListener('click', () => {
+      if (i !== qIndex) { qIndex = i; startCurrent(); window.scrollTo(0, 0); }
+    });
+    c.appendChild(b);
+  });
+  updateUpNextHighlight();
+}
+
+function updateUpNextHighlight() {
+  Array.from($('upNextList').children).forEach((el, i) => el.classList.toggle('playing', i === qIndex));
+}
+
+function shortsThumb(img, id) {
+  img.onerror = () => { img.onerror = null; img.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg'; };
+  img.src = 'https://i.ytimg.com/vi/' + id + '/oardefault.jpg';  // vertical Shorts thumbnail
+}
+
+function startCurrent() {
+  const v = queue[qIndex];
+  $('vtitle').textContent = v.title;
+  $('watchTitle').textContent = v.title;
+  updateUpNextHighlight();
+  player.loadVideoById(v.id);
+  showUi();
+  if (!ticker) ticker = setInterval(tick, 400);
+}
+
+/* ── Shorts engine: three players (prev/current/next), neighbors preloaded
+      muted & paused at frame zero so a swipe starts playback instantly ── */
+const S = { panels: [], inited: false, readyCount: 0 };
+let roles = [0, 1, 2];   // S.panels index occupying the [prev, current, next] slot
+let sIdx = 0;
+const at = (i) => (i + REELS.length) % REELS.length;
+
+function applyPos() {
+  const cls = ['pos-prev', 'pos-cur', 'pos-next'];
+  roles.forEach((pi, slot) => {
+    const el = S.panels[pi].el;
+    el.classList.remove('pos-prev', 'pos-cur', 'pos-next');
+    el.classList.add(cls[slot]);
+  });
+}
+
+function setPoster(pan, id) {
+  shortsThumb(pan.el.querySelector('.sposter img'), id);
+  pan.el.querySelector('.sposter').classList.remove('hidden');
+}
+function hidePoster(pan) { pan.el.querySelector('.sposter').classList.add('hidden'); }
+
+function initShorts(cb) {
+  if (S.inited) { cb(); return; }
+  S.inited = true;
+  let called = false;
+  const fire = () => { if (!called) { called = true; cb(); } };
+  [['shA', 'spA'], ['shB', 'spB'], ['shC', 'spC']].forEach(([hostId, panelId]) => {
+    const pan = { el: $(panelId), p: null, id: null, mode: 'off', ready: false, error: false };
+    S.panels.push(pan);
+    pan.p = new YT.Player(hostId, {
+      host: 'https://www.youtube-nocookie.com',
+      playerVars: baseVars(false),
+      events: {
+        onReady: () => { if (++S.readyCount >= 3) fire(); },
+        onStateChange: (e) => onSState(pan, e),
+        onError: () => onSError(pan),
+      },
+    });
+  });
+  setTimeout(fire, 4000);   // safety: don't hang if one player never reports ready
+}
+
+function goLive(pan, id) {
+  pan.mode = 'live';
+  if (pan.id === id && pan.ready && !pan.error) {
+    pan.p.unMute(); pan.p.playVideo();      // already buffered: instant start
+  } else {
+    pan.id = id; pan.ready = false; pan.error = false;
+    setPoster(pan, id);
+    pan.p.unMute();
+    pan.p.loadVideoById(id);
+  }
+}
+
+function preload(pan, id) {
+  pan.mode = 'preload';
+  setPoster(pan, id);
+  pan.p.mute();
+  if (pan.id === id && !pan.error) {        // still buffered from an earlier play
+    pan.p.pauseVideo(); pan.p.seekTo(0, true); pan.ready = true;
+    return;
+  }
+  pan.id = id; pan.ready = false; pan.error = false;
+  pan.p.loadVideoById(id);                  // muted; paused at 0 on first PLAYING
+}
+
+function onSState(pan, e) {
+  if (e.data === YT.PlayerState.PLAYING) {
+    if (pan.mode === 'preload') { pan.p.pauseVideo(); pan.p.seekTo(0, true); pan.ready = true; }
+    else if (pan.mode === 'live') { errStreak = 0; hidePoster(pan); }
+  } else if (e.data === YT.PlayerState.ENDED && pan.mode === 'live') {
+    pan.p.seekTo(0, true); pan.p.playVideo();   // Shorts loop
+  }
+}
+
+function onSError(pan) {
+  pan.error = true;
+  if (pan.mode !== 'live') return;   // failed preload; dealt with if it ever goes live
+  errStreak++;
+  if (errStreak >= 3) {
+    showToast('Videos are not loading — check the internet connection.', 6000);
+    closePlayer(); errStreak = 0;
+    return;
+  }
+  showToast('That one would not play — skipping.');
+  setTimeout(() => commitSwipe(1), 350);
+}
+
+function openShorts(index) {
+  currentMode = 'reels';
+  sIdx = index;
+  $('overlay').classList.remove('hidden');
+  $('overlay').classList.add('shorts-mode');
+  document.body.style.overflow = 'hidden';
+  $('shortsFill').style.width = '0%';
+  initShorts(() => {
+    applyPos();
+    goLive(S.panels[roles[1]], REELS[sIdx].id);
+    if (REELS.length > 1) {
+      preload(S.panels[roles[0]], REELS[at(sIdx - 1)].id);
+      preload(S.panels[roles[2]], REELS[at(sIdx + 1)].id);
+    }
+    if (!ticker) ticker = setInterval(tick, 400);
+  });
+}
+
+let errStreak = 0;
+function onPlayerError(e) {
+  errStreak++;
+  if (errStreak >= 3) {
+    showToast('Videos are not loading — check the internet connection' +
+      (location.protocol === 'file:' ? ', and open this site through http:// (see the yellow banner)' : '') + '.', 6000);
+    closePlayer();
+    errStreak = 0;
+    return;
+  }
+  showToast('"' + (queue[qIndex] ? queue[qIndex].title : 'Video') + '" would not play (error ' + e.data + ') — skipping.');
+  next();
+}
+
+function onState(e) {
+  if (e.data === YT.PlayerState.ENDED) {
+    // Intercept the end so YouTube's related-videos screen never appears
+    if (AUTOPLAY_NEXT && qIndex < queue.length - 1) next();
+    else closePlayer();
+  } else if (e.data === YT.PlayerState.PLAYING) {
+    errStreak = 0;
+    $('playBtn').classList.remove('is-paused');
+    $('bigPlay').classList.add('hidden');
+    scheduleHide();
+  } else if (e.data === YT.PlayerState.PAUSED) {
+    $('playBtn').classList.add('is-paused');
+    $('bigPlay').classList.remove('hidden');
+    showUi();
+  }
+}
+
+function next() { qIndex = (qIndex + 1) % queue.length; startCurrent(); }
+function prev() { qIndex = (qIndex - 1 + queue.length) % queue.length; startCurrent(); }
+
+function togglePlay() {
+  if (!playerReady) return;
+  const s = player.getPlayerState();
+  if (s === YT.PlayerState.PLAYING) player.pauseVideo();
+  else player.playVideo();
+}
+
+function closePlayer() {
+  if (currentMode === 'reels') {
+    S.panels.forEach((pan) => {
+      if (pan.p && typeof pan.p.pauseVideo === 'function') { pan.p.mute(); pan.p.pauseVideo(); }
+      pan.mode = 'off';
+    });
+    $('overlay').classList.add('hidden');
+    $('overlay').classList.remove('shorts-mode');
+    $('track').classList.remove('anim');
+    $('track').style.transform = '';
+    document.body.style.overflow = '';
+  } else {
+    if (playerReady) player.stopVideo();
+    $('watch').classList.add('hidden');
+    $('mainView').classList.remove('hidden');
+    document.body.classList.remove('watch-mode');
+  }
+  clearInterval(ticker); ticker = null;
+}
+
+/* ── Progress bar ── */
+let seeking = false;
+function fmt(s) {
+  s = Math.max(0, Math.floor(s || 0));
+  const m = Math.floor(s / 60), sec = String(s % 60).padStart(2, '0');
+  return m + ':' + sec;
+}
+function tick() {
+  if (currentMode === 'reels') {
+    const pan = S.panels[roles[1]];
+    if (!pan || !pan.p || typeof pan.p.getDuration !== 'function') return;
+    const d = pan.p.getDuration() || 0, t = pan.p.getCurrentTime() || 0;
+    $('shortsFill').style.width = (d > 0 ? (t / d) * 100 : 0) + '%';
+    return;
+  }
+  if (!playerReady || seeking) return;
+  const d = player.getDuration() || 0, t = player.getCurrentTime() || 0;
+  if (d > 0) $('seek').value = (t / d) * 100;
+  $('timeLbl').textContent = fmt(t) + ' / ' + fmt(d);
+}
+$('seek').addEventListener('input', () => { seeking = true; });
+$('seek').addEventListener('change', () => {
+  if (playerReady) {
+    const d = player.getDuration() || 0;
+    player.seekTo(d * ($('seek').value / 100), true);
+  }
+  seeking = false;
+});
+
+/* ── Controls auto-hide ── */
+function showUi() {
+  $('stage').classList.remove('hide-ui');
+  scheduleHide();
+}
+function scheduleHide() {
+  clearTimeout(hideTimer);
+  if (currentMode === 'reels') return;  // Shorts UI stays visible, like the real app
+  hideTimer = setTimeout(() => {
+    if (playerReady && player.getPlayerState() === YT.PlayerState.PLAYING) {
+      $('stage').classList.add('hide-ui');
+    }
+  }, 3000);
+}
+
+/* ── Shorts swipe navigation (touch drag, mouse drag, wheel, arrow keys) ── */
+const track = $('track'), overlayEl = $('overlay');
+let dragStartY = null, suppressClick = false, wheelLock = false, animating = false;
+
+function commitSwipe(dir) {  // 1 = next (swipe up), -1 = previous (swipe down)
+  if (animating || REELS.length < 2 || !S.inited) {
+    track.classList.add('anim'); track.style.transform = 'translateY(0)';
+    return;
+  }
+  animating = true;
+  const outPan = S.panels[roles[1]];
+  const inPan = S.panels[roles[dir === 1 ? 2 : 0]];
+  outPan.mode = 'off'; outPan.p.mute(); outPan.p.pauseVideo();
+  sIdx = at(sIdx + dir);
+  $('shortsFill').style.width = '0%';
+  goLive(inPan, REELS[sIdx].id);          // preloaded neighbor: starts instantly
+  track.classList.add('anim');
+  track.style.transform = 'translateY(' + (dir === 1 ? '-100%' : '100%') + ')';
+  let fired = false;
+  const done = () => {
+    if (fired) return;
+    fired = true;
+    track.removeEventListener('transitionend', done);
+    // rotate panel roles so the slid-in player becomes "current", then refill the far slot
+    roles = dir === 1 ? [roles[1], roles[2], roles[0]] : [roles[2], roles[0], roles[1]];
+    applyPos();
+    track.classList.remove('anim');
+    track.style.transform = 'translateY(0)';
+    preload(S.panels[roles[dir === 1 ? 2 : 0]], REELS[at(sIdx + dir)].id);
+    animating = false;
+  };
+  track.addEventListener('transitionend', done);
+  setTimeout(done, 400);                  // safety net if transitionend is swallowed
+}
+
+overlayEl.addEventListener('pointerdown', (e) => {
+  suppressClick = false;   // reset on every press, in every mode — a stale flag eats taps
+  if (currentMode !== 'reels' || animating) return;
+  dragStartY = e.clientY;
+  track.classList.remove('anim');
+});
+// Listen on window (not the overlay) so buttons keep receiving normal clicks
+window.addEventListener('pointermove', (e) => {
+  if (dragStartY === null) return;
+  const dy = e.clientY - dragStartY;
+  if (Math.abs(dy) > 8) suppressClick = true;
+  track.style.transform = 'translateY(' + dy + 'px)';
+});
+function endDrag(e) {
+  if (dragStartY === null) return;
+  const dy = e.clientY - dragStartY;
+  dragStartY = null;
+  if (dy < -60) commitSwipe(1);
+  else if (dy > 60) commitSwipe(-1);
+  else { track.classList.add('anim'); track.style.transform = 'translateY(0)'; }
+}
+window.addEventListener('pointerup', endDrag);
+window.addEventListener('pointercancel', endDrag);
+
+overlayEl.addEventListener('wheel', (e) => {
+  if (currentMode !== 'reels') return;
+  e.preventDefault();
+  if (wheelLock || Math.abs(e.deltaY) < 25) return;
+  wheelLock = true;
+  setTimeout(() => { wheelLock = false; }, 450);
+  commitSwipe(e.deltaY > 0 ? 1 : -1);
+}, { passive: false });
+
+document.addEventListener('keydown', (e) => {
+  if (currentMode !== 'reels' || overlayEl.classList.contains('hidden')) return;
+  if (e.key === 'ArrowDown') { e.preventDefault(); commitSwipe(1); }
+  if (e.key === 'ArrowUp') { e.preventDefault(); commitSwipe(-1); }
+});
+
+/* ── Wire up buttons ── */
+$('shield').addEventListener('click', () => {
+  if (suppressClick) return;  // this tap was a swipe, not a tap
+  if ($('stage').classList.contains('hide-ui')) showUi();
+  else togglePlay();
+});
+$('bigPlay').addEventListener('click', togglePlay);
+$('playBtn').addEventListener('click', togglePlay);
+$('nextBtn').addEventListener('click', next);
+$('prevBtn').addEventListener('click', prev);
+$('backBtn').addEventListener('click', closePlayer);
+
+/* Shorts chrome: silent tap-to-pause on the shield, back arrow to exit */
+$('sShield').addEventListener('click', () => {
+  if (suppressClick || !S.inited) return;
+  const pan = S.panels[roles[1]];
+  if (!pan || pan.mode !== 'live') return;
+  if (pan.p.getPlayerState() === YT.PlayerState.PLAYING) pan.p.pauseVideo();
+  else pan.p.playVideo();
+});
+$('sBack').addEventListener('click', closePlayer);
+</script>
+</body>
+</html>
