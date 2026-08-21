@@ -236,18 +236,7 @@
     padding: 8px 12px;
     transition: opacity .25s;
   }
-  #topbar { top: 0; background: linear-gradient(rgba(0,0,0,.6), transparent); }
   .stage.hide-ui .bar { opacity: 0; pointer-events: none; }
-  .cbtn {
-    border: none; cursor: pointer; flex-shrink: 0;
-    width: 40px; height: 40px; border-radius: 50%;
-    font-size: 20px; color: #fff;
-    background: rgba(0,0,0,.35);
-    display: grid; place-items: center;
-  }
-  .cbtn:hover { background: rgba(0,0,0,.55); }
-  #vtitle { color: #fff; font-size: 15px; font-weight: 500; flex: 1;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* YouTube-style control bar */
   #botbar {
@@ -350,7 +339,6 @@
   #shortsUI { display: none; }
   .shorts-mode #shortsUI { display: block; }
   #sShield { position: absolute; inset: 0; z-index: 2; touch-action: none; }
-  #sBack { position: absolute; top: 14px; left: 14px; z-index: 3; }
   /* Our own Shorts-style pause indicator: opaque enough to fully mask
      YouTube's centered play button inside the iframe */
   #sPause {
@@ -414,7 +402,8 @@
     .wchrow { margin: 0 16px 8px; }
     .wacts { margin-left: 0; width: 100%; }
     .upnext { padding: 8px 12px; }
-    body.watch-mode header, body.watch-mode #bottomnav, body.watch-mode #chips { display: none; }
+    /* keep the bottom nav in watch mode — with no back button, it's the way out */
+    body.watch-mode header, body.watch-mode #chips { display: none; }
   }
   @media (max-width: 600px) {
     header { padding: 0 8px; }
@@ -482,10 +471,6 @@
             <div id="yt"></div>
             <div id="shield"></div>
             <button id="bigPlay" class="hidden" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
-            <div class="bar" id="topbar">
-              <button class="cbtn" id="backBtn" aria-label="Back">←</button>
-              <span id="vtitle"></span>
-            </div>
             <div class="bar" id="botbar">
               <input type="range" id="seek" min="0" max="100" value="0" step="0.1">
               <div id="ybtns">
@@ -544,7 +529,6 @@
   </div>
   <div id="shortsUI">
     <div id="sShield"></div>
-    <button class="cbtn" id="sBack" aria-label="Back">←</button>
     <button id="sPause" class="hidden" aria-label="Play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
     <div id="srail">
       <button class="railbtn" id="sLike" aria-label="Like"><svg viewBox="0 0 24 24"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/></svg></button>
@@ -832,6 +816,7 @@ function openPlayer(mode, index) {
 /* ── Watch page ── */
 function openWatch(index) {
   queue = VIDEOS; qIndex = index; currentMode = 'videos';
+  armHistory();
   document.body.classList.add('watch-mode');
   $('mainView').classList.add('hidden');
   $('watch').classList.remove('hidden');
@@ -892,8 +877,6 @@ function shortsThumb(img, id) {
 }
 
 function startCurrent() {
-  const v = queue[qIndex];
-  $('vtitle').textContent = v.title;
   syncWatchInfo();
   updateUpNextHighlight();
   player.loadVideoById(v.id);
@@ -1019,6 +1002,7 @@ function onSError(pan) {
 
 function openShorts(index) {
   currentMode = 'reels';
+  armHistory();
   sHist = [index]; sPos = 0;
   $('overlay').classList.remove('hidden');
   $('overlay').classList.add('shorts-mode');
@@ -1099,6 +1083,7 @@ function closePlayer() {
     document.body.classList.remove('watch-mode');
   }
   clearInterval(ticker); ticker = null;
+  if (historyArmed && !closingFromPop) { historyArmed = false; history.back(); }
 }
 
 /* ── Progress ── */
@@ -1245,8 +1230,23 @@ $('bigPlay').addEventListener('click', togglePlay);
 $('playBtn').addEventListener('click', togglePlay);
 $('nextBtn').addEventListener('click', next);
 $('prevBtn').addEventListener('click', prev);
-$('backBtn').addEventListener('click', closePlayer);
 $('likeBtn').addEventListener('click', () => $('likeBtn').classList.toggle('liked'));
+
+/* No back buttons: the browser/phone back gesture closes the player instead
+   of leaving the site, and Escape works on desktop */
+let historyArmed = false, closingFromPop = false;
+function armHistory() {
+  if (!historyArmed) { history.pushState({ kidtube: 1 }, ''); historyArmed = true; }
+}
+window.addEventListener('popstate', () => {
+  historyArmed = false;
+  const playerOpen = !overlayEl.classList.contains('hidden') || !$('watch').classList.contains('hidden');
+  if (playerOpen) { closingFromPop = true; closePlayer(); closingFromPop = false; }
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if (!overlayEl.classList.contains('hidden') || !$('watch').classList.contains('hidden')) closePlayer();
+});
 
 /* Fullscreen: native API on the stage (controls + shield stay overlaid), CSS fallback elsewhere */
 const stageEl = $('stage');
@@ -1292,7 +1292,6 @@ $('sPause').addEventListener('click', () => {
   const pan = S.panels[roles[1]];
   if (pan && pan.mode === 'live') { sUserPaused = false; pan.p.playVideo(); }
 });
-$('sBack').addEventListener('click', closePlayer);
 $('sLike').addEventListener('click', () => $('sLike').classList.toggle('liked'));
 </script>
 </body>
